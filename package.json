@@ -10,7 +10,8 @@
     "seed": "node -r dotenv/config ./scripts/seed.mjs",
     "type-check": "tsc --noEmit",
     "format:write": "prettier --write \"{app,lib,components}/**/*.{ts,tsx,mdx}\" --cache",
-    "format:check": "prettier --check \"{app,lib,components}**/*.{ts,tsx,mdx}\" --cache"
+    "format:check": "prettier --check \"{app,lib,components}**/*.{ts,tsx,mdx}\" --cache",
+    "embed": "tsx scripts/generate_embeddings.ts"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.0.5",
@@ -25,9 +26,11 @@
     "@radix-ui/react-tooltip": "^1.0.7",
     "@supabase/ssr": "^0.1.0",
     "@supabase/supabase-js": "^2.42.0",
+    "@types/pdf-parse": "^1.1.4",
     "@vercel/analytics": "^1.1.2",
     "@vercel/kv": "^1.0.1",
     "@vercel/og": "^0.6.2",
+    "@xenova/transformers": "^2.16.1",
     "ai": "^3.0.12",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
@@ -41,6 +44,7 @@
     "next-auth": "5.0.0-beta.4",
     "next-themes": "^0.2.1",
     "openai": "^4.24.7",
+    "pdf-parse": "^1.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-intersection-observer": "^9.5.3",
@@ -72,6 +76,7 @@
     "tailwind-merge": "^2.2.0",
     "tailwindcss": "^3.4.1",
     "tailwindcss-animate": "^1.0.7",
+    "tsx": "^4.7.2",
     "typescript": "^5.3.3"
   },
   "packageManager": "pnpm@8.6.3"
