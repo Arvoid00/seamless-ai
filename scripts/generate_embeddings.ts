@@ -3,13 +3,10 @@ import path from 'path'
 import pdfParse from 'pdf-parse'
 import { createClient } from '../utils/supabase/client'
 import { createHash } from 'crypto'
-import OpenAI from 'openai'
 import { SupabaseVectorStore } from '@langchain/community/vectorstores/supabase'
 import { OpenAIEmbeddings } from '@langchain/openai'
 
 require('dotenv').config()
-
-// const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
 async function convertPdfToTextAndStore(filePath: string) {
   try {
@@ -43,8 +40,6 @@ async function convertPdfToTextAndStore(filePath: string) {
     const title: string = data.info.Title ?? 'No Title'
     const content = data.text.replace(/\n/g, ' ') // Extracted text from PDF
     const pages = data.numpages
-
-    // const metadata = JSON.stringify({title, hash, pages});
 
     // Store the documents in the database
     await SupabaseVectorStore.fromTexts(

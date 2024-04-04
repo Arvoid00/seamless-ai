@@ -32,98 +32,38 @@ import {
   nanoid
 } from '@/lib/utils'
 import { saveChat } from '@/app/actions'
-import { SpinnerMessage, UserMessage } from '@/components/stocks/message'
+import { SpinnerMessage, UserMessage, VectorMessage } from '@/components/stocks/message'
 import { Chat } from '@/lib/types'
 import { getUser } from '@/app/(auth)/actions'
+import { confirmPurchase, vectorSearch } from './ui-functions'
 
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || ''
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || ''
+  apiKey: OPENAI_API_KEY
 })
 
-async function confirmPurchase(symbol: string, price: number, amount: number) {
-  'use server'
+async function getVectorResult(query: string) {
+  let url = `http://localhost:3000/test`;
 
-  const aiState = getMutableAIState<typeof AI>()
+  let options = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: `{"query":"${query}"}`
+  };
 
-  const purchasing = createStreamableUI(
-    <div className="inline-flex items-start gap-1 md:items-center">
-      {spinner}
-      <p className="mb-2">
-        Purchasing {amount} ${symbol}...
-      </p>
-    </div>
-  )
-
-  const systemMessage = createStreamableUI(null)
-
-  runAsyncFnWithoutBlocking(async () => {
-    await sleep(1000)
-
-    purchasing.update(
-      <div className="inline-flex items-start gap-1 md:items-center">
-        {spinner}
-        <p className="mb-2">
-          Purchasing {amount} ${symbol}... working on it...
-        </p>
-      </div>
-    )
-
-    await sleep(1000)
-
-    purchasing.done(
-      <div>
-        <p className="mb-2">
-          You have successfully purchased {amount} ${symbol}. Total cost:{' '}
-          {formatNumber(amount * price)}
-        </p>
-      </div>
-    )
-
-    systemMessage.done(
-      <SystemMessage>
-        You have purchased {amount} shares of {symbol} at ${price}. Total cost ={' '}
-        {formatNumber(amount * price)}.
-      </SystemMessage>
-    )
-
-    aiState.done({
-      ...aiState.get(),
-      messages: [
-        ...aiState.get().messages.slice(0, -1),
-        {
-          id: nanoid(),
-          role: 'function',
-          name: 'showStockPurchase',
-          content: JSON.stringify({
-            symbol,
-            price,
-            defaultAmount: amount,
-            status: 'completed'
-          })
-        },
-        {
-          id: nanoid(),
-          role: 'system',
-          content: `[User has purchased ${amount} shares of ${symbol} at ${price}. Total cost = ${amount * price
-            }]`
-        }
-      ]
-    })
-  })
-
-  return {
-    purchasingUI: purchasing.value,
-    newMessage: {
-      id: nanoid(),
-      display: systemMessage.value
-    }
-  }
+  const response = await fetch(url, options)
+  const { data, usage } = await response.json()
+  return { data, usage }
 }
 
 async function submitUserMessage(content: string) {
   'use server'
 
   const aiState = getMutableAIState<typeof AI>()
+
+  console.log('User message:', content)
 
   aiState.update({
     ...aiState.get(),
@@ -141,7 +81,7 @@ async function submitUserMessage(content: string) {
   let textNode: undefined | React.ReactNode
 
   const ui = render({
-    model: 'gpt-3.5-turbo',
+    model: 'gpt-4-turbo-preview',
     provider: openai,
     initial: <SpinnerMessage />,
     messages: [
@@ -150,6 +90,7 @@ async function submitUserMessage(content: string) {
         content: `\
 You are a stock trading conversation bot and you can help users buy stocks, step by step.
 You and the user can discuss stock prices and the user can adjust the amount of stocks they want to buy, or place an order, in the UI.
+You are also a document search engine. You can search for vectors or documents based on user input.
 
 Messages inside [] means that it's a UI element or a user event. For example:
 - "[Price of AAPL = 100]" means that an interface of the stock price of AAPL is shown to the user.
@@ -159,6 +100,7 @@ If the user requests purchasing a stock, call \`show_stock_purchase_ui\` to show
 If the user just wants the price, call \`show_stock_price\` to show the price.
 If you want to show trending stocks, call \`list_stocks\`.
 If you want to show events, call \`get_events\`.
+If the user requests a vector search, vec search, vc, or document search, call \'vec_search\' to comply with the request.
 If the user wants to sell stock, or complete another impossible task, respond that you are a demo and cannot do that.
 
 Besides that, you can also chat with users and do some calculations if needed.`
@@ -195,6 +137,41 @@ Besides that, you can also chat with users and do some calculations if needed.`
       return textNode
     },
     functions: {
+      vecSearch: {
+        description:
+          'Do a vector search. Search for a vector or document based on user input. Use this to search for a vector or document.',
+        parameters: z.object({
+          query: z.string().describe('The query to search for.'),
+        }),
+        render: async function* ({ query }) {
+          yield (
+            <BotCard>
+              <BotMessage content={`Doing a VectorSearch for query: '${query}' `} />
+            </BotCard>
+          )
+
+          const { data, usage } = await getVectorResult(query)
+
+          aiState.done({
+            ...aiState.get(),
+            messages: [
+              ...aiState.get().messages,
+              {
+                id: nanoid(),
+                role: 'function',
+                name: 'vecSearch',
+                content: JSON.stringify({ data, usage })
+              }
+            ]
+          })
+
+          return (
+            <BotCard>
+              <BotMessage content={`Result: ${data.message.content}`} />
+            </BotCard>
+          )
+        }
+      },
       listStocks: {
         description: 'List three imaginary stocks that are trending.',
         parameters: z.object({
@@ -412,7 +389,8 @@ export type UIState = {
 export const AI = createAI<AIState, UIState>({
   actions: {
     submitUserMessage,
-    confirmPurchase
+    confirmPurchase,
+    // vectorSearch,
   },
   initialUIState: [],
   initialAIState: { chatId: nanoid(), messages: [] },
@@ -420,44 +398,38 @@ export const AI = createAI<AIState, UIState>({
     'use server'
 
     const user = await getUser()
+    if (!user) return
 
-    if (user) {
-      const aiState = getAIState()
+    const aiState = getAIState()
 
-      if (aiState) {
-        const uiState = getUIStateFromAIState(aiState)
-        return uiState
-      }
-    } else {
-      return
+    if (aiState) {
+      const uiState = getUIStateFromAIState(aiState)
+      return uiState
     }
   },
   unstable_onSetAIState: async ({ state, done }) => {
     'use server'
 
     const user = await getUser()
+    if (!user) return
 
-    if (user) {
-      const { chatId, messages } = state
+    const { chatId, messages } = state
 
-      const createdAt = new Date()
-      const userId = user.id
-      const path = `/chat/${chatId}`
-      const title = messages[0].content.substring(0, 100)
+    const createdAt = new Date()
+    const userId = user.id
+    const path = `/chat/${chatId}`
+    const title = messages[0].content.substring(0, 100)
 
-      const chat: Chat = {
-        id: chatId,
-        title,
-        userId,
-        createdAt,
-        messages,
-        path
-      }
-
-      await saveChat(chat)
-    } else {
-      return
+    const chat: Chat = {
+      id: chatId,
+      title,
+      userId,
+      createdAt,
+      messages,
+      path
     }
+
+    await saveChat(chat)
   }
 })
 
@@ -484,6 +456,8 @@ export const getUIStateFromAIState = (aiState: Chat) => {
             <BotCard>
               <Events props={JSON.parse(message.content)} />
             </BotCard>
+          ) : message.name === 'vecSearch' ? (
+            <VectorMessage data={JSON.parse(message.content).data} usage={JSON.parse(message.content).usage} />
           ) : null
         ) : message.role === 'user' ? (
           <UserMessage>{message.content}</UserMessage>
