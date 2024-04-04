@@ -15,7 +15,7 @@ export async function getChats(userId?: string | null) {
       .from('chats')
       .select('payload')
       .order('payload->createdAt', { ascending: false })
-      .eq('userId', userId)
+      .eq('user_id', userId)
       .throwOnError()
 
     return (chats?.map(entry => entry.payload) as Chat[]) ?? []
