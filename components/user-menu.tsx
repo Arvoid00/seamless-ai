@@ -1,5 +1,3 @@
-import { type Session } from '@/lib/types'
-
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -8,10 +6,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { signOut } from '@/auth'
+import { User } from '@supabase/supabase-js'
+import { signout } from '@/app/(auth)/actions'
 
 export interface UserMenuProps {
-  user: Session['user']
+  user: User
 }
 
 function getUserInitials(name: string) {
@@ -26,7 +25,7 @@ export function UserMenu({ user }: UserMenuProps) {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="pl-0">
             <div className="flex size-7 shrink-0 select-none items-center justify-center rounded-full bg-muted/50 text-xs font-medium uppercase text-muted-foreground">
-              {getUserInitials(user.email)}
+              {getUserInitials(user.email ?? "example@domain.com")}
             </div>
             <span className="ml-2 hidden md:block">{user.email}</span>
           </Button>
@@ -39,7 +38,7 @@ export function UserMenu({ user }: UserMenuProps) {
           <form
             action={async () => {
               'use server'
-              await signOut()
+              await signout()
             }}
           >
             <button className=" relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-xs outline-none transition-colors hover:bg-red-500 hover:text-white focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">

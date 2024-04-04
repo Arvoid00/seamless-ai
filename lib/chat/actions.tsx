@@ -34,7 +34,7 @@ import {
 import { saveChat } from '@/app/actions'
 import { SpinnerMessage, UserMessage } from '@/components/stocks/message'
 import { Chat } from '@/lib/types'
-import { auth } from '@/auth'
+import { getUser } from '@/app/(auth)/actions'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || ''
@@ -104,9 +104,8 @@ async function confirmPurchase(symbol: string, price: number, amount: number) {
         {
           id: nanoid(),
           role: 'system',
-          content: `[User has purchased ${amount} shares of ${symbol} at ${price}. Total cost = ${
-            amount * price
-          }]`
+          content: `[User has purchased ${amount} shares of ${symbol} at ${price}. Total cost = ${amount * price
+            }]`
         }
       ]
     })
@@ -420,9 +419,9 @@ export const AI = createAI<AIState, UIState>({
   unstable_onGetUIState: async () => {
     'use server'
 
-    const session = await auth()
+    const user = await getUser()
 
-    if (session && session.user) {
+    if (user) {
       const aiState = getAIState()
 
       if (aiState) {
@@ -436,13 +435,13 @@ export const AI = createAI<AIState, UIState>({
   unstable_onSetAIState: async ({ state, done }) => {
     'use server'
 
-    const session = await auth()
+    const user = await getUser()
 
-    if (session && session.user) {
+    if (user) {
       const { chatId, messages } = state
 
       const createdAt = new Date()
-      const userId = session.user.id as string
+      const userId = user.id
       const path = `/chat/${chatId}`
       const title = messages[0].content.substring(0, 100)
 
