@@ -15,8 +15,7 @@
     "jsx": "preserve",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
-      "@/utils/supabase/*": ["src/utils/supabase/*"]
+      "@/*": ["./*"]
     },
     "plugins": [
       {

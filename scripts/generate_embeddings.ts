@@ -1,20 +1,19 @@
 import fs from 'fs'
 import path from 'path'
 import pdfParse from 'pdf-parse'
-import { pipeline } from '@xenova/transformers'
 import { createClient } from '../utils/supabase/client'
 import { createHash } from 'crypto'
+import OpenAI from 'openai'
+import { SupabaseVectorStore } from '@langchain/community/vectorstores/supabase'
+import { OpenAIEmbeddings } from '@langchain/openai'
 
 require('dotenv').config()
 
+// const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+
 async function convertPdfToTextAndStore(filePath: string) {
   try {
-    const supabase = createClient()
-    const generateEmbedding = await pipeline(
-      'feature-extraction',
-      'Supabase/gte-small'
-    )
-
+    const client = createClient()
     // Read PDF file
     const dataBuffer = fs.readFileSync(filePath)
 
@@ -22,49 +21,41 @@ async function convertPdfToTextAndStore(filePath: string) {
     const hash = createHash('md5').update(dataBuffer).digest('hex')
 
     // Check if the hash already exists in the database
-    let { data: existingDoc, error: findError } = await supabase
+    let { data: existingDocs, error: findError } = await client
       .from('documents')
-      .select('hash')
-      .eq('hash', hash)
-      .select('title')
-      .maybeSingle()
+      .select()
 
-    if (findError) throw findError
+    if (findError) console.error(findError)
 
     // If document exists, skip processing
-    if (existingDoc) {
-      console.log('Document already processed. Skipping...\n', {
-        title: existingDoc.title,
-        hash
-      })
-      return
+    if (existingDocs) {
+      const matchedDoc = existingDocs.find(doc => doc.metadata.hash === hash)
+      if (matchedDoc) {
+        console.log('Document already processed. Skipping...\n', {
+          title: matchedDoc.metadata.title,
+          hash
+        })
+        return
+      }
     }
 
     const data = await pdfParse(dataBuffer)
-    const title = data.info.Title ?? 'No Title'
-    const body = data.text // Extracted text from PDF
+    const title: string = data.info.Title ?? 'No Title'
+    const content = data.text.replace(/\n/g, ' ') // Extracted text from PDF
     const pages = data.numpages
 
-    // Use the text to generate an embedding
-    const output = await generateEmbedding(body, {
-      pooling: 'mean',
-      normalize: true
-    })
+    // const metadata = JSON.stringify({title, hash, pages});
 
-    // Extract the embedding output
-    const embedding = Array.from(output.data)
-
-    // Store the title, body (text), embedding, and hash in Postgres
-    await supabase
-      .from('documents')
-      .insert({
-        title: title,
-        pages: pages,
-        body: body,
-        embedding: embedding,
-        hash: hash // Ensure you have a 'hash' column in your 'documents' table
-      })
-      .throwOnError()
+    // Store the documents in the database
+    await SupabaseVectorStore.fromTexts(
+      [content],
+      [{ title, pages, hash }],
+      new OpenAIEmbeddings(),
+      {
+        client,
+        tableName: 'documents'
+      }
+    )
 
     console.log('Successfully stored PDF data!')
   } catch (error) {
