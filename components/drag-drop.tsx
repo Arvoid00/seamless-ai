@@ -2,55 +2,64 @@
 
 import { createClient } from "@/utils/supabase/client";
 import { useRef, useState } from "react";
+
+export type TFile = string | ArrayBuffer | ArrayBufferView | Blob | Buffer | File | FormData | NodeJS.ReadableStream | ReadableStream<Uint8Array> | URLSearchParams
+
 export default function DragAndDrop() {
-    const [dragActive, setDragActive] = useState<boolean>(false);
+    const [dragActive, setDragActive] = useState(false);
     const inputRef = useRef<any>(null);
-    const [files, setFiles] = useState<any>([]);
+    const [files, setFiles] = useState<Blob[]>([]);
 
     function handleChange(e: any) {
         e.preventDefault();
-        console.log("File has been added");
-        if (e.target.files && e.target.files[0]) {
-            console.log(e.target.files);
-            for (let i = 0; i < e.target.files["length"]; i++) {
-                setFiles((prevState: any) => [...prevState, e.target.files[i]]);
+        let newFiles: FileList | null = null;
+
+        if ("dataTransfer" in e) {
+            newFiles = e.dataTransfer.files;
+        } else {
+            newFiles = e.target.files;
+        }
+
+        if (newFiles != null) {
+            for (let i = 0; i < newFiles.length; i++) {
+                setFiles((prevState) => [...prevState, newFiles[i]]);
             }
         }
     }
 
     async function handleSubmitFile(e: any) {
+        e.preventDefault();
         if (files.length === 0) {
             alert("No file has been submitted");
             return
         }
 
-        console.log(files)
-        files.forEach(async (file: string | ArrayBuffer | ArrayBufferView | Blob | Buffer | File | FormData | NodeJS.ReadableStream | ReadableStream<Uint8Array> | URLSearchParams) => {
-            // const { data, error } = await uploadDocument(file)
-            const supabase = createClient()
-            const { data, error } = await supabase.storage
-                .from('documents')
-                .upload(`/documents/${file.name}`, file)
-            console.log(data, error)
-            if (error) {
-                console.error(error)
-                alert("Error uploading file" + error.message)
-                return
-            }
-            if (data) {
-                setFiles([])
-                alert("Upload succesfull")
-            }
+        const formData = new FormData();
+        for (let i = 0; i < inputRef.current.files.length; i++) {
+            formData.append("files", inputRef.current.files[i]);
+        }
+
+        const response = await fetch('/api/embed', {
+            method: 'POST',
+            body: formData
         });
+
+        if (response.ok) {
+            setFiles([]);
+            alert("Files uploaded successfully");
+        } else {
+            alert("Error uploading files");
+        }
     }
 
     function handleDrop(e: any) {
         e.preventDefault();
         e.stopPropagation();
         setDragActive(false);
-        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-            for (let i = 0; i < e.dataTransfer.files["length"]; i++) {
-                setFiles((prevState: any) => [...prevState, e.dataTransfer.files[i]]);
+        const files = e.dataTransfer.files;
+        if (files && files[0]) {
+            for (let i = 0; i < files["length"]; i++) {
+                setFiles((prevState: any) => [...prevState, files[i]]);
             }
         }
     }

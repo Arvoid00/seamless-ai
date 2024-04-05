@@ -8,11 +8,15 @@ import { OpenAIEmbeddings } from '@langchain/openai'
 
 require('dotenv').config()
 
-async function convertPdfToTextAndStore(filePath: string) {
+async function getBufferFromPath(filePath: string) {
+  // Read PDF file
+  const dataBuffer = fs.readFileSync(filePath)
+  return dataBuffer
+}
+
+async function convertPdfToTextAndStore(dataBuffer: Buffer) {
   try {
     const client = createClient()
-    // Read PDF file
-    const dataBuffer = fs.readFileSync(filePath)
 
     // Generate MD5 hash of the PDF content
     const hash = createHash('md5').update(dataBuffer).digest('hex')
@@ -67,7 +71,8 @@ async function convertAllPdfsInFolder(folderPath: string) {
 
     for (const pdfFile of pdfFiles) {
       const filePath = path.join(folderPath, pdfFile)
-      await convertPdfToTextAndStore(filePath)
+      const dataBuffer = await getBufferFromPath(filePath)
+      await convertPdfToTextAndStore(dataBuffer)
     }
   } catch (error) {
     console.error('Error converting PDFs in folder:', error)

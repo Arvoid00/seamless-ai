@@ -1,7 +1,7 @@
 'use server'
 
+import { TFile } from "@/components/drag-drop";
 import { createClient } from "@/utils/supabase/server"
-import { revalidatePath } from "next/cache"
 
 export async function getDocumentsInFolder(folderName: string) {
     const supabase = createClient()
@@ -16,14 +16,11 @@ export async function getDocumentsInFolder(folderName: string) {
     return { documents, error }
 }
 
-export async function uploadDocument(file: string | ArrayBuffer | ArrayBufferView | Blob | Buffer | File | FormData | NodeJS.ReadableStream | ReadableStream<Uint8Array> | URLSearchParams) {
-    console.log(file);
-
+export async function uploadDocument(file: TFile) {
     const supabase = createClient()
     const { data, error } = await supabase.storage
         .from('documents')
         .upload(`/documents/${file.name}`, file)
 
-    revalidatePath('/docs')
     return { data, error }
 }

@@ -1,7 +1,5 @@
 import DragAndDrop from '@/components/drag-drop'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card'
-import { createClient } from '@/utils/supabase/server'
 import React from 'react'
 import { getDocumentsInFolder } from './actions'
 
@@ -15,7 +13,6 @@ function DocCard({ doc }: { doc: any }) {
     return (
         <Card className="w-full max-w-sm">
             <CardContent className="flex items-center gap-4">
-                {/* <FileIcon className="h-8 w-8" /> */}
                 <div className="grid gap-1">
                     <CardTitle className="text-base font-semibold pt-4">{doc.name}</CardTitle>
                     <CardDescription className="text-sm font-normal">uploaded at {doc.created_at}</CardDescription>
@@ -69,7 +66,6 @@ export default async function DocsPage() {
                         ))}
                     </div>
                 </div>
-
             </main>
         </div>
     )
