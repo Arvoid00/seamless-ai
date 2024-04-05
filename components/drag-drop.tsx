@@ -1,5 +1,6 @@
 "use client";
 
+import { createClient } from "@/utils/supabase/client";
 import { useRef, useState } from "react";
 export default function DragAndDrop() {
     const [dragActive, setDragActive] = useState<boolean>(false);
@@ -17,12 +18,30 @@ export default function DragAndDrop() {
         }
     }
 
-    function handleSubmitFile(e: any) {
+    async function handleSubmitFile(e: any) {
         if (files.length === 0) {
-            // no file has been submitted
-        } else {
-            // write submit logic here
+            alert("No file has been submitted");
+            return
         }
+
+        console.log(files)
+        files.forEach(async (file: string | ArrayBuffer | ArrayBufferView | Blob | Buffer | File | FormData | NodeJS.ReadableStream | ReadableStream<Uint8Array> | URLSearchParams) => {
+            // const { data, error } = await uploadDocument(file)
+            const supabase = createClient()
+            const { data, error } = await supabase.storage
+                .from('documents')
+                .upload(`/documents/${file.name}`, file)
+            console.log(data, error)
+            if (error) {
+                console.error(error)
+                alert("Error uploading file" + error.message)
+                return
+            }
+            if (data) {
+                setFiles([])
+                alert("Upload succesfull")
+            }
+        });
     }
 
     function handleDrop(e: any) {
@@ -113,12 +132,12 @@ export default function DragAndDrop() {
                     ))}
                 </div>
 
-                {/* <button
-          className="bg-black rounded-lg p-2 mt-3 w-auto"
-          onClick={handleSubmitFile}
-        >
-          <span className="p-2 text-white">Submit</span>
-        </button> */}
+                {files.length > 0 && <button
+                    className="bg-black rounded-lg p-2 mt-3 w-auto"
+                    onClick={handleSubmitFile}
+                >
+                    <span className="p-2 text-white">Submit</span>
+                </button>}
             </form>
         </div>
     );
