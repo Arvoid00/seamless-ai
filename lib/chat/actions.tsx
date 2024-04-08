@@ -43,7 +43,7 @@ const openai = new OpenAI({
 })
 
 async function getVectorResult(query: string) {
-  let url = `http://localhost:3000/test`;
+  let url = `http://localhost:3000/vectorsearch`;
 
   let options = {
     method: 'POST',
@@ -139,7 +139,7 @@ Besides that, you can also chat with users and do some calculations if needed.`
     functions: {
       vecSearch: {
         description:
-          'Do a vector search. Search for a vector or document based on user input. Use this to search for a vector or document.',
+          'Do a vector search. Search for a vector or document based on user input. Use this function to search for information based on the user query.',
         parameters: z.object({
           query: z.string().describe('The query to search for.'),
         }),
@@ -167,7 +167,8 @@ Besides that, you can also chat with users and do some calculations if needed.`
 
           return (
             <BotCard>
-              <BotMessage content={`Result: ${data.message.content}`} />
+              <VectorMessage data={data} usage={usage} />
+              {/* <BotMessage content={`Result: ${data.message.content}`} /> */}
             </BotCard>
           )
         }

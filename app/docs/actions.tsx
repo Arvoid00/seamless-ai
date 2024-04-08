@@ -1,6 +1,5 @@
 'use server'
 
-import { TFile } from "@/components/drag-drop";
 import { createClient } from "@/utils/supabase/server"
 
 export async function getDocumentsInFolder(folderName: string) {
@@ -16,11 +15,10 @@ export async function getDocumentsInFolder(folderName: string) {
     return { documents, error }
 }
 
-export async function uploadDocument(file: TFile) {
+export async function getDocuments() {
     const supabase = createClient()
-    const { data, error } = await supabase.storage
+    const { data, error } = await supabase
         .from('documents')
-        .upload(`/documents/${file.name}`, file)
-
+        .select()
     return { data, error }
 }

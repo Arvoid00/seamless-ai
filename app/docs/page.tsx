@@ -1,13 +1,10 @@
 import DragAndDrop from '@/components/drag-drop'
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card'
 import React from 'react'
-import { getDocumentsInFolder } from './actions'
-
-const sufixes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-const getBytes = (bytes: any) => {
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    return !bytes && '0 Bytes' || (bytes / Math.pow(1024, i)).toFixed(2) + " " + sufixes[i];
-};
+import { getDocuments, getDocumentsInFolder } from './actions'
+import { columns } from './columns'
+import { DataTable } from '@/components/table/data-table'
+import { formatDate, getBytes } from '@/lib/utils'
 
 function DocCard({ doc }: { doc: any }) {
     return (
@@ -15,7 +12,7 @@ function DocCard({ doc }: { doc: any }) {
             <CardContent className="flex items-center gap-4">
                 <div className="grid gap-1">
                     <CardTitle className="text-base font-semibold pt-4">{doc.name}</CardTitle>
-                    <CardDescription className="text-sm font-normal">uploaded at {doc.created_at}</CardDescription>
+                    <CardDescription className="text-sm font-normal">uploaded at {formatDate(doc.created_at)}</CardDescription>
                 </div>
                 <div className="ml-auto text-sm font-medium shrink-0">{getBytes(doc.metadata.size)}</div>
             </CardContent>
@@ -25,15 +22,11 @@ function DocCard({ doc }: { doc: any }) {
 
 export default async function DocsPage() {
 
-    const { documents, error } = await getDocumentsInFolder('documents')
+    const { data: documents, error } = await getDocuments()
 
     if (error) {
         console.error(error)
         return <div>Error loading documents. <pre>{JSON.stringify(error, null, 2)}</pre></div>
-    }
-
-    if (!documents) {
-        return <div>Error loading documents</div>
     }
 
     return (
@@ -46,26 +39,7 @@ export default async function DocsPage() {
             </header>
             <main className="flex-1 p-4 md:p-6">
                 <DragAndDrop />
-                <div className='space-y-4'>
-                    <h2 className='text-lg'>Category A</h2>
-                    <div className="grid grid-cols-3 items-start gap-2 md:gap-4 lg:gap-6">
-                        {documents.map((doc, idx) => (
-                            <DocCard key={idx} doc={doc} />
-                        ))}
-                    </div>
-                    <h2 className='text-lg'>Category B</h2>
-                    <div className="grid grid-cols-3 items-start gap-2 md:gap-4 lg:gap-6">
-                        {documents.map((doc, idx) => (
-                            <DocCard key={idx} doc={doc} />
-                        ))}
-                    </div>
-                    <h2 className='text-lg'>Category C</h2>
-                    <div className="grid grid-cols-3 items-start gap-2 md:gap-4 lg:gap-6">
-                        {documents.map((doc, idx) => (
-                            <DocCard key={idx} doc={doc} />
-                        ))}
-                    </div>
-                </div>
+                {error ? <div>Error loading documents. <pre>{JSON.stringify(error, null, 2)}</pre></div> : <DataTable data={documents ?? []} columns={columns} />}
             </main>
         </div>
     )

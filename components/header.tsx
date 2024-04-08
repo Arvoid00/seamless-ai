@@ -55,6 +55,13 @@ export function Header() {
           <UserOrLogin />
         </React.Suspense>
       </div>
+      <Button variant="link" asChild>
+        <Link href="/">Home</Link>
+      </Button>
+      <Button variant="link" asChild>
+        <Link href="/docs">Doc Manager</Link>
+      </Button>
+
       {/* <div className="flex items-center justify-end space-x-2">
         <a
           target="_blank"

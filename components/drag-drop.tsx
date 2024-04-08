@@ -1,14 +1,15 @@
 "use client";
 
-import { createClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
-
-export type TFile = string | ArrayBuffer | ArrayBufferView | Blob | Buffer | File | FormData | NodeJS.ReadableStream | ReadableStream<Uint8Array> | URLSearchParams
+import { useFormStatus } from "react-dom";
 
 export default function DragAndDrop() {
     const [dragActive, setDragActive] = useState(false);
     const inputRef = useRef<any>(null);
     const [files, setFiles] = useState<Blob[]>([]);
+    const router = useRouter();
+    const { pending } = useFormStatus();
 
     function handleChange(e: any) {
         e.preventDefault();
@@ -35,21 +36,18 @@ export default function DragAndDrop() {
         }
 
         const formData = new FormData();
-        for (let i = 0; i < inputRef.current.files.length; i++) {
-            formData.append("files", inputRef.current.files[i]);
-        }
+        files.forEach((file, idx) => formData.append(`file-${idx}`, file));
 
-        const response = await fetch('/api/embed', {
+        const result = await fetch('/api/embed', {
             method: 'POST',
             body: formData
         });
 
-        if (response.ok) {
-            setFiles([]);
-            alert("Files uploaded successfully");
-        } else {
-            alert("Error uploading files");
-        }
+        const data = await result.json();
+
+        alert(data.message)
+        setFiles([]);
+        router.refresh()
     }
 
     function handleDrop(e: any) {
@@ -144,8 +142,9 @@ export default function DragAndDrop() {
                 {files.length > 0 && <button
                     className="bg-black rounded-lg p-2 mt-3 w-auto"
                     onClick={handleSubmitFile}
+                    disabled={pending}
                 >
-                    <span className="p-2 text-white">Submit</span>
+                    <span className="p-2 text-white">{pending ? "Submitting" : "Submit"}</span>
                 </button>}
             </form>
         </div>
