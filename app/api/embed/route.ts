@@ -30,7 +30,7 @@ async function uploadFileToSupabase(
   const client = createClient()
   const { data: obj, error } = await client.storage
     .from('documents')
-    .upload(`/documents/${safeFileName}`, file)
+    .upload(`/documents/${safeFileName + new Date().toISOString()}`, file)
 
   if (error) {
     throw new Error(`Error while uploading '${safeFileName}': ${error.message}`)
@@ -94,8 +94,8 @@ async function generateSlidingWindowEmbeddings(
 }
 
 type Document = {
-  title: string
-  content: string
+  name: string
+  // content: string
   // embedding: number[]
   pages: number
   hash: string
@@ -103,8 +103,8 @@ type Document = {
 }
 
 async function insertDocument({
-  title,
-  content,
+  name,
+  // content,
   // embedding,
   pages,
   hash,
@@ -115,8 +115,8 @@ async function insertDocument({
   const { data } = await supabase
     .from('documents')
     .insert({
-      title,
-      content,
+      name,
+      // content,
       // embedding,
       metadata: { pages, hash },
       source: publicUrl
@@ -125,7 +125,7 @@ async function insertDocument({
     .select()
     .maybeSingle()
 
-  await supabase.from('document_owners').insert({ document_id: data.id })
+  await supabase.from('document_owners').insert({ document_id: data.id }) // Implicitly uses the authenticated UserID as the owner
 
   return data
 }
@@ -146,8 +146,8 @@ async function insertDocumentSections({
   const sections = chunkObjects.map(({ chunk, embedding }) => ({
     document_id: document_id,
     content: chunk,
-    embedding,
-    source
+    embedding
+    // source
   }))
 
   const { error } = await supabase.from('document_sections').insert(sections)
@@ -221,13 +221,18 @@ export async function POST(req: NextRequest) {
       //     .throwOnError()
 
       const publicUrl = await uploadFileToSupabase(file)
-      const { title, content, pages, hash } = await extractTextFromPDF(file)
+      const {
+        title: name,
+        content,
+        pages,
+        hash
+      } = await extractTextFromPDF(file)
       // const embedding = await generateEntireDocEmbedding(content)
       const chunkObjects = await generateSlidingWindowEmbeddings(content)
 
       const { id } = await insertDocument({
-        title,
-        content,
+        name,
+        // content,
         // embedding,
         pages,
         hash,

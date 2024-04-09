@@ -48,7 +48,7 @@ export const columns: ColumnDef<Document>[] = [
     //     enableHiding: false,
     // },
     {
-        accessorKey: "title",
+        accessorKey: "name",
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Name" />
         ),
@@ -59,7 +59,7 @@ export const columns: ColumnDef<Document>[] = [
                 <div className="flex space-x-2">
                     {label && <Badge variant="outline">{label.label}</Badge>}
                     <span className="max-w-[500px] truncate font-medium">
-                        {row.getValue("title")}
+                        {row.getValue("name")}
 
                     </span>
                     {/* <div>{JSON.stringify(row.original)}</div> */}

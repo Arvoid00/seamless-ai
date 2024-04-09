@@ -22,10 +22,10 @@ export function DocumentViewer({ children, doc }: { children?: React.ReactNode, 
             </SheetTrigger>
             <SheetContent className="sm:max-w-full lg:max-w-1/2">
                 <SheetHeader>
-                    <SheetTitle className="w-full text-wrap">{doc.title}</SheetTitle>
-                    <SheetDescription>
+                    <SheetTitle className="w-full text-wrap">{doc.name}</SheetTitle>
+                    {/* <SheetDescription>
                         View the document here.
-                    </SheetDescription>
+                    </SheetDescription> */}
                 </SheetHeader>
                 <object data={doc.source} width="100%" height="85%" className="my-5" />
                 <SheetFooter>
