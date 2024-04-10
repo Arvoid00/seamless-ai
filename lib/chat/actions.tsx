@@ -36,11 +36,46 @@ import { SpinnerMessage, UserMessage, VectorMessage } from '@/components/stocks/
 import { Chat } from '@/lib/types'
 import { getUser } from '@/app/(auth)/actions'
 import { confirmPurchase, vectorSearch } from './ui-functions'
+import { VectorResponse } from '@/app/vectorsearch/route'
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || ''
 const openai = new OpenAI({
   apiKey: OPENAI_API_KEY
 })
+
+export async function generateEmbedding(content: string): Promise<number[]> {
+  const { data: [{ embedding }] } = await openai.embeddings.create({
+    input: content,
+    model: 'text-embedding-3-small'
+  })
+
+  return embedding
+  // const embeddingResponse = await fetch(
+  //   'https://api.openai.com/v1/embeddings',
+  //   {
+  //     method: 'POST',
+  //     headers: {
+  //       Authorization: `Bearer ${OPENAI_API_KEY}`,
+  //       'Content-Type': 'application/json'
+  //     },
+  //     body: JSON.stringify({
+  //       model: 'text-embedding-3-small',
+  //       input: content
+  //     })
+  //   }
+  // )
+
+  // if (embeddingResponse.status !== 200) {
+  //   throw new Error(
+  //     'Failed to create embedding for question  ' + embeddingResponse.statusText
+  //   )
+  // }
+
+  // const {
+  //   data: [{ embedding }]
+  // } = await embeddingResponse.json()
+  // return embedding
+}
 
 async function getVectorResult(query: string) {
   let url = `http://localhost:3000/vectorsearch`;
@@ -54,8 +89,8 @@ async function getVectorResult(query: string) {
   };
 
   const response = await fetch(url, options)
-  const { data, usage } = await response.json()
-  return { data, usage }
+  const vectorResponse: VectorResponse = await response.json()
+  return vectorResponse
 }
 
 async function submitUserMessage(content: string) {
@@ -150,7 +185,7 @@ Besides that, you can also chat with users and do some calculations if needed.`
             </BotCard>
           )
 
-          const { data, usage } = await getVectorResult(query)
+          const { data, usage, sections } = await getVectorResult(query)
 
           aiState.done({
             ...aiState.get(),
@@ -160,14 +195,14 @@ Besides that, you can also chat with users and do some calculations if needed.`
                 id: nanoid(),
                 role: 'function',
                 name: 'vecSearch',
-                content: JSON.stringify({ data, usage })
+                content: JSON.stringify({ data, usage, sections })
               }
             ]
           })
 
           return (
             <BotCard>
-              <VectorMessage data={data} usage={usage} />
+              <VectorMessage data={data} usage={usage} sections={sections} />
               {/* <BotMessage content={`Result: ${data.message.content}`} /> */}
             </BotCard>
           )
@@ -458,7 +493,7 @@ export const getUIStateFromAIState = (aiState: Chat) => {
               <Events props={JSON.parse(message.content)} />
             </BotCard>
           ) : message.name === 'vecSearch' ? (
-            <VectorMessage data={JSON.parse(message.content).data} usage={JSON.parse(message.content).usage} />
+            <VectorMessage data={JSON.parse(message.content).data} usage={JSON.parse(message.content).usage} sections={JSON.parse(message.content).sections} />
           ) : null
         ) : message.role === 'user' ? (
           <UserMessage>{message.content}</UserMessage>

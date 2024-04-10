@@ -10,6 +10,7 @@ import { Embedding } from 'openai/resources/embeddings'
 import { Content } from '@radix-ui/react-dropdown-menu'
 import { SupabaseVectorStore } from '@langchain/community/vectorstores/supabase'
 import { OpenAIEmbeddings } from '@langchain/openai'
+import { generateEmbedding } from '@/lib/chat/actions'
 // import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 
 // TODO: Rollback sequence if any of the steps fail
@@ -80,13 +81,10 @@ async function generateSlidingWindowEmbeddings(
       position,
       Math.min(position + chunkSize, content.length)
     )
-    const { data: embedding } = await openai.embeddings.create({
-      input: chunk,
-      model: 'text-embedding-3-small'
-    })
+    const embedding = await generateEmbedding(chunk)
 
     position += chunkSize - overlapSize
-    const chunkObject = { chunk, embedding: embedding[0].embedding }
+    const chunkObject = { chunk, embedding: embedding }
     chunkObjects.push(chunkObject)
   }
 
@@ -123,7 +121,7 @@ async function insertDocument({
     })
     .throwOnError()
     .select()
-    .maybeSingle()
+    .single()
 
   await supabase.from('document_owners').insert({ document_id: data.id }) // Implicitly uses the authenticated UserID as the owner
 
