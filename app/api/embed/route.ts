@@ -1,122 +1,96 @@
-// @ts-ignore
-import PdfParse from 'pdf-parse-fork'
 import OpenAI from 'openai'
 import { createHash } from 'crypto'
 import { createClient } from '@/utils/supabase/server'
-import { NextApiResponse } from 'next'
 import { File } from 'buffer'
 import { NextRequest } from 'next/server'
-import { Embedding } from 'openai/resources/embeddings'
-import { Content } from '@radix-ui/react-dropdown-menu'
-import { SupabaseVectorStore } from '@langchain/community/vectorstores/supabase'
-import { OpenAIEmbeddings } from '@langchain/openai'
 import { generateEmbedding } from '@/lib/chat/actions'
-// import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import { WebPDFLoader } from 'langchain/document_loaders/web/pdf'
+import { Document } from 'langchain/document'
+import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter'
+import { uploadFileToSupabase } from '@/app/docs/actions'
 
 // TODO: Rollback sequence if any of the steps fail
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-
 type FileContents = {
-  title: string
+  name: string
   content: string
   pages: number
   hash: string
+  docs: Document[]
 }
 
-async function uploadFileToSupabase(
-  file: FormDataEntryValue & File
-): Promise<string> {
-  const safeFileName = file.name.replace(/[^0-9a-zA-Z!-_.*'()]/g, '_')
-  const client = createClient()
-  const { data: obj, error } = await client.storage
-    .from('documents')
-    .upload(`/documents/${safeFileName + new Date().toISOString()}`, file)
+async function extractTextFromPDF(
+  url: string,
+  fileName: string
+): Promise<FileContents> {
+  const response = await fetch(url)
+  const data = await response.blob()
+  const loader = new WebPDFLoader(data)
+  const docs = await loader.load()
 
-  if (error) {
-    throw new Error(`Error while uploading '${safeFileName}': ${error.message}`)
-  }
+  const name = docs[0].metadata.title || fileName || 'Untitled'
+  const pages = docs[0].metadata.pages
+  const content = docs.map(doc => doc.pageContent).join(' ')
+  const hash = createHash('md5').update(content).digest('hex')
 
-  const {
-    data: { publicUrl }
-  } = client.storage.from('documents').getPublicUrl(obj.path)
-
-  return publicUrl
-}
-
-async function extractTextFromPDF(file: File): Promise<FileContents> {
-  const dataBuffer = Buffer.from(await file.arrayBuffer())
-  const data = await PdfParse(dataBuffer)
-  const title = file.name.replace(/[^0-9a-zA-Z!-_.*'()]/g, '_')
-  const content = data.text.replace(/\n/g, ' ')
-  const pages = data.numpages
-  const hash = createHash('md5').update(dataBuffer).digest('hex')
-
-  return { title, content, pages, hash }
+  return { name, content, pages, hash, docs }
 }
 
 type ChunkObject = {
+  doc: Document<Record<string, any>>
   chunk: string
   embedding: number[]
 }
 
-async function generateEntireDocEmbedding(content: string) {
-  const { data } = await openai.embeddings.create({
-    input: content,
-    model: 'text-embedding-3-small'
+async function splitText(docs: Document[]) {
+  const splitter = new RecursiveCharacterTextSplitter({
+    chunkSize: 1000,
+    chunkOverlap: 100
   })
-  return data[0].embedding
-}
 
-async function generateSlidingWindowEmbeddings(
-  content: string
-): Promise<ChunkObject[]> {
-  const chunkSize = 1024
-  const overlapSize = 100
-  let position = 0
-  let chunkObjects = []
+  // const chunkObjects: ChunkObject[] = await Promise.all(
+  //   docs.map(async doc => ({
+  //     doc: doc,
+  //     chunk: doc.pageContent,
+  //     embedding: await generateEmbedding(doc.pageContent)
+  //   }))
+  // )
 
-  while (position < content.length) {
-    const chunk = content.substring(
-      position,
-      Math.min(position + chunkSize, content.length)
-    )
-    const embedding = await generateEmbedding(chunk)
+  const newDocs = await splitter.splitDocuments(docs)
 
-    position += chunkSize - overlapSize
-    const chunkObject = { chunk, embedding: embedding }
-    chunkObjects.push(chunkObject)
-  }
+  const chunkObjects: ChunkObject[] = await Promise.all(
+    newDocs.map(async doc => ({
+      doc: doc,
+      chunk: doc.pageContent,
+      embedding: await generateEmbedding(doc.pageContent)
+    }))
+  )
 
   return chunkObjects
 }
 
-type Document = {
+type FileDocument = {
   name: string
-  // content: string
-  // embedding: number[]
   pages: number
   hash: string
   publicUrl: string
+  fileName: string
 }
 
 async function insertDocument({
   name,
-  // content,
-  // embedding,
   pages,
   hash,
-  publicUrl
-}: Document) {
+  publicUrl,
+  fileName
+}: FileDocument) {
   const supabase = createClient()
 
   const { data } = await supabase
     .from('documents')
     .insert({
       name,
-      // content,
-      // embedding,
-      metadata: { pages, hash },
+      metadata: { pages, hash, fileName },
       source: publicUrl
     })
     .throwOnError()
@@ -130,23 +104,28 @@ async function insertDocument({
 
 type DocumentSection = {
   document_id: number
-  chunkObjects: ChunkObject[]
+  chunks: ChunkObject[]
   source: string
+  fileName: string
 }
 
 async function insertDocumentSections({
   document_id,
-  chunkObjects,
-  source
+  chunks,
+  source,
+  fileName
 }: DocumentSection): Promise<void> {
   const supabase = createClient()
 
-  const sections = chunkObjects.map(({ chunk, embedding }) => ({
-    document_id: document_id,
-    content: chunk,
-    embedding
-    // source
-  }))
+  const sections = chunks.map(({ doc, chunk, embedding }) => {
+    const sourcePage = source + `#page=${doc.metadata.loc.pageNumber}`
+    return {
+      document_id,
+      content: chunk,
+      embedding,
+      metadata: { fileName, sourcePage, ...doc.metadata }
+    }
+  })
 
   const { error } = await supabase.from('document_sections').insert(sections)
 
@@ -165,82 +144,28 @@ export async function POST(req: NextRequest) {
         throw new Error('Invalid file type')
       }
 
-      //   const safeFileName = file.name.replace(/[^0-9a-zA-Z!-_.*'()]/g, '_')
+      // @ts-expect-error
+      const { fileName, publicUrl } = await uploadFileToSupabase(file)
+      const { name, pages, hash, docs } = await extractTextFromPDF(
+        publicUrl,
+        fileName
+      )
 
-      //   // Upload the file to Supabase Storage bucket
-      //   const client = createClient()
-      //   const { data: obj, error } = await client.storage
-      //     .from('documents')
-      //     .upload(`/documents/${safeFileName}`, file)
-      //   if (error) {
-      //     console.error('err:', error.message)
-      //     throw new Error(
-      //       `Error while uploading '${safeFileName}': ${error.message}`
-      //     )
-      //   }
-
-      //   // Get the public URL of the uploaded file
-      //   const {
-      //     data: { publicUrl }
-      //   } = client.storage.from('documents').getPublicUrl(obj.path)
-
-      //   console.log('Uploaded file:', publicUrl)
-
-      //   // Extract text and metadata from the PDF
-      //   const dataBuffer = Buffer.from(await file.arrayBuffer())
-      //   const data = await PdfParse(dataBuffer)
-      //   const title = safeFileName
-      //   const content = data.text.replace(/\n/g, ' ') // Extracted text from PDF
-      //   const pages = data.numpages
-      //   const hash = createHash('md5').update(dataBuffer).digest('hex')
-
-      //   // Generate embeddings for the text
-      //   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-
-      //   // Generate a one-time embedding for the query itself
-      //   const { data: embeddings, usage } = await openai.embeddings.create({
-      //     input: content,
-      //     model: 'text-embedding-ada-002'
-      //   })
-
-      //   const embedding = embeddings[0].embedding
-
-      //   // Store the documents in the database
-
-      //   await client
-      //     .from('documents')
-      //     .insert({
-      //       title,
-      //       content,
-      //       embedding,
-      //       metadata: { pages, hash },
-      //       source: publicUrl
-      //     })
-      //     .throwOnError()
-
-      const publicUrl = await uploadFileToSupabase(file)
-      const {
-        title: name,
-        content,
-        pages,
-        hash
-      } = await extractTextFromPDF(file)
-      // const embedding = await generateEntireDocEmbedding(content)
-      const chunkObjects = await generateSlidingWindowEmbeddings(content)
+      const chunks = await splitText(docs)
 
       const { id } = await insertDocument({
         name,
-        // content,
-        // embedding,
         pages,
         hash,
-        publicUrl
+        publicUrl,
+        fileName
       })
 
       await insertDocumentSections({
         document_id: id,
-        chunkObjects,
-        source: publicUrl
+        chunks,
+        source: publicUrl,
+        fileName: fileName
       })
     }
 

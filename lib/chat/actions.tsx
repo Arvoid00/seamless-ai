@@ -48,33 +48,7 @@ export async function generateEmbedding(content: string): Promise<number[]> {
     input: content,
     model: 'text-embedding-3-small'
   })
-
   return embedding
-  // const embeddingResponse = await fetch(
-  //   'https://api.openai.com/v1/embeddings',
-  //   {
-  //     method: 'POST',
-  //     headers: {
-  //       Authorization: `Bearer ${OPENAI_API_KEY}`,
-  //       'Content-Type': 'application/json'
-  //     },
-  //     body: JSON.stringify({
-  //       model: 'text-embedding-3-small',
-  //       input: content
-  //     })
-  //   }
-  // )
-
-  // if (embeddingResponse.status !== 200) {
-  //   throw new Error(
-  //     'Failed to create embedding for question  ' + embeddingResponse.statusText
-  //   )
-  // }
-
-  // const {
-  //   data: [{ embedding }]
-  // } = await embeddingResponse.json()
-  // return embedding
 }
 
 async function getVectorResult(query: string) {
@@ -181,7 +155,7 @@ Besides that, you can also chat with users and do some calculations if needed.`
         render: async function* ({ query }) {
           yield (
             <BotCard>
-              <BotMessage content={`Doing a VectorSearch for query: '${query}' `} />
+              <SpinnerMessage message={`Doing a VectorSearch for query: '${query}' `} />
             </BotCard>
           )
 

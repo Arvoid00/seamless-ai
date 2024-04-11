@@ -1,24 +1,7 @@
 import DragAndDrop from '@/components/drag-drop'
-import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card'
-import React from 'react'
-import { getDocuments, getDocumentsInFolder } from './actions'
+import { getDocuments } from './actions'
 import { columns } from './columns'
 import { DataTable } from '@/components/table/data-table'
-import { formatDate, getBytes } from '@/lib/utils'
-
-function DocCard({ doc }: { doc: any }) {
-    return (
-        <Card className="w-full max-w-sm">
-            <CardContent className="flex items-center gap-4">
-                <div className="grid gap-1">
-                    <CardTitle className="text-base font-semibold pt-4">{doc.name}</CardTitle>
-                    <CardDescription className="text-sm font-normal">uploaded at {formatDate(doc.created_at)}</CardDescription>
-                </div>
-                <div className="ml-auto text-sm font-medium shrink-0">{getBytes(doc.metadata.size)}</div>
-            </CardContent>
-        </Card>
-    )
-}
 
 export default async function DocsPage() {
 

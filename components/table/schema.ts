@@ -9,7 +9,8 @@ export const documentSchema = z.object({
       hash: z.string().optional(),
       size: z.number().optional(),
       pages: z.number().optional(),
-      mimetype: z.string().optional()
+      mimetype: z.string().optional(),
+      fileName: z.string().optional()
     })
     .optional(),
   id: z.number().optional(),

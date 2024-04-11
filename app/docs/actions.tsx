@@ -22,3 +22,43 @@ export async function getDocuments() {
         .select()
     return { data, error }
 }
+
+export async function deleteDocument(id: number) {
+    const supabase = createClient()
+    const { data } = await supabase
+        .from('documents')
+        .delete()
+        .eq('id', id)
+        .throwOnError()
+    return { data }
+}
+
+export async function uploadFileToSupabase(file: File) {
+    const safeFileName = file.name.replace(/[^0-9a-zA-Z!-_.*'()]/g, '_')
+    const supabase = createClient()
+    const { data: obj, error } = await supabase.storage
+        .from('documents')
+        .upload(`/documents/${safeFileName}`, file, {
+            upsert: false
+        })
+
+    if (error) {
+        throw new Error(`Error while uploading '${safeFileName}': ${error.message}`)
+    }
+    console.log('Uploaded file', obj.path)
+    const {
+        data: { publicUrl }
+    } = supabase.storage.from('documents').getPublicUrl(obj.path)
+
+    return { fileName: safeFileName, publicUrl }
+}
+
+export async function deleteFileObject(fileName: string) {
+    const path = `documents/${fileName}`
+    console.log('Deleting file', path)
+    const supabase = createClient()
+    const { error } = await supabase.storage
+        .from('documents')
+        .remove([path])
+    return { error }
+}

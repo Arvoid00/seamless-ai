@@ -24,7 +24,13 @@ export type PageSection = {
   content: string
   similarity: number
   metadata?: {
-    source?: string
+    loc?: { lines?: { from?: number; to?: number }; pageNumber?: number }
+    pdf?: {
+      totalPages?: number
+      info?: { Creator?: string; CreationDate?: string }
+    }
+    sourcePage?: string
+    fileName?: string
   }
 }
 
@@ -79,7 +85,7 @@ export async function POST(req: Request, res: NextApiResponse) {
   const embedding = await generateEmbedding(sanitizedQuery)
 
   const { error: matchError, data: pageSections }: RPCResponse =
-    await supabase.rpc('match_documents', {
+    await supabase.rpc('match_documents_new', {
       query_embedding: embedding,
       match_threshold: 0.0, //0.78,
       match_count: 5
@@ -87,19 +93,20 @@ export async function POST(req: Request, res: NextApiResponse) {
     })
 
   if (matchError || !pageSections)
-    throw new Error('Error fetching page sections, or no sections returned.')
+    throw new Error(
+      'Error fetching page sections, or no sections returned. Error? : ' +
+        matchError?.message
+    )
 
-  console.log('matchError', matchError)
+  console.log('Number of Page Sections:', pageSections.length)
   console.log('pageSections', pageSections)
 
   const corpus = pageSections
     .map(
       (section: any, index: number) =>
-        `Page ${index + 1}: (Source: ${section.metadata?.source ?? 'unknown'})\n\n ${section.content}`
+        `Page ${index + 1}: (Source: ${section.metadata?.sourcePage ?? 'unknown'})\n\n ${section.content}`
     )
     .join('\n\n')
-
-  console.log('Page Sections amount:', pageSections.length)
 
   const systemMessage = {
     role: 'system',

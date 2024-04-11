@@ -19,7 +19,11 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 import { labels } from "@/components/table/data"
-import { documentSchema } from "@/components/table/schema"
+import { Document, documentSchema } from "@/components/table/schema"
+import { deleteDocument, deleteFileObject } from "./actions"
+import { toast } from "sonner"
+import { useRouter } from "next/navigation"
+import { PageSection } from "../vectorsearch/route"
 
 interface DataTableRowActionsProps<TData> {
     row: Row<TData>
@@ -28,7 +32,26 @@ interface DataTableRowActionsProps<TData> {
 export function DocumentsRowActions<TData>({
     row,
 }: DataTableRowActionsProps<TData>) {
-    const doc = documentSchema.parse(row.original)
+    const doc = row.original as Document
+    const router = useRouter()
+
+    async function handleFileDelete(e: React.MouseEvent) {
+        e.preventDefault()
+        console.log("Deleting file", doc.metadata?.fileName)
+        try {
+            if (!doc.metadata?.fileName) throw new Error("No file name found")
+            const { error } = await deleteFileObject(doc.metadata?.fileName)
+            if (error) throw error
+            const { data } = await deleteDocument(doc.id!)
+            console.log(data)
+            toast.success("File deleted!")
+            router.refresh()
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error)
+            toast.error("Error deleting file", { description: errorMessage })
+        }
+    }
+
 
     return (
         <DropdownMenu>
@@ -43,7 +66,7 @@ export function DocumentsRowActions<TData>({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[160px]">
                 {/* <DropdownMenuItem>Favorite</DropdownMenuItem> */}
-                <DropdownMenuSeparator />
+                {/* <DropdownMenuSeparator /> */}
                 {/* <DropdownMenuSub>
                     <DropdownMenuSubTrigger>Labels</DropdownMenuSubTrigger>
                     <DropdownMenuSubContent>
@@ -57,9 +80,9 @@ export function DocumentsRowActions<TData>({
                     </DropdownMenuSubContent>
                 </DropdownMenuSub> 
                 <DropdownMenuSeparator /> */}
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => handleFileDelete(e)} className="cursor-pointer hover:bg-destructive-foreground">
                     Delete
-                    <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
+                    {/* <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut> */}
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
