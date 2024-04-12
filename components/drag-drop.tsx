@@ -113,7 +113,7 @@ export default function DragAndDrop() {
 
     return (
         <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-            <DrawerTrigger className="mb-5" asChild><Button>Upload a document</Button></DrawerTrigger>
+            <DrawerTrigger className="" asChild><Button>Upload a document</Button></DrawerTrigger>
             <DrawerContent>
                 <div className="flex items-center justify-center h-max p-8 ">
                     <form

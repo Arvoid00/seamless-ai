@@ -3,10 +3,6 @@
 import { IconOpenAI, IconUser, IconVercel } from '@/components/ui/icons'
 import { cn } from '@/lib/utils'
 import { spinner } from './spinner'
-import { CodeBlock } from '../ui/codeblock'
-import { MemoizedReactMarkdown } from '../markdown'
-import remarkGfm from 'remark-gfm'
-import remarkMath from 'remark-math'
 import { StreamableValue } from 'ai/rsc'
 import { useStreamableText } from '@/lib/hooks/use-streamable-text'
 import { PageSection } from '@/app/vectorsearch/route'
@@ -34,7 +30,7 @@ import {
 } from "@/components/ui/accordion"
 import { Badge } from "@/components/ui/badge"
 import { DocumentViewer } from '../document-view-sheet'
-
+import { MarkdownWrapper } from '../markdown'
 
 // Different types of message bubbles.
 
@@ -78,61 +74,22 @@ export function VectorMessage({
               {/* <AccordionTrigger>Is it accessible?</AccordionTrigger> */}
               <div className="">
                 <div className='flex justify-between'>
-                  <span>Results for query with VectorSearch:</span>
+                  <div>VectorSearch Results:</div>
                   {sections && (<Tooltip>
-                    <TooltipTrigger><AccordionTrigger>💡</AccordionTrigger></TooltipTrigger>
+                    <TooltipTrigger><AccordionTrigger className='hover:no-underline py-2'>💡</AccordionTrigger></TooltipTrigger>
                     <TooltipContent>
                       <p>Show sources</p>
                     </TooltipContent>
                   </Tooltip>)}
                 </div>
               </div>
-              <MemoizedReactMarkdown
-                className="prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0"
-                remarkPlugins={[remarkGfm, remarkMath]}
-                components={{
-                  p({ children }) {
-                    return <p className="mb-2 last:mb-0">{children}</p>
-                  },
-                  code({ node, inline, className, children, ...props }) {
-                    if (children.length) {
-                      if (children[0] == '▍') {
-                        return (
-                          <span className="mt-1 animate-pulse cursor-default">▍</span>
-                        )
-                      }
+              <MarkdownWrapper text={text} />
 
-                      children[0] = (children[0] as string).replace('`▍`', '▍')
-                    }
-
-                    const match = /language-(\w+)/.exec(className || '')
-
-                    if (inline) {
-                      return (
-                        <code className={className} {...props}>
-                          {children}
-                        </code>
-                      )
-                    }
-
-                    return (
-                      <CodeBlock
-                        key={Math.random()}
-                        language={(match && match[1]) || ''}
-                        value={String(children).replace(/\n$/, '')}
-                        {...props}
-                      />
-                    )
-                  }
-                }}
-              >
-                {text}
-              </MemoizedReactMarkdown>
               <AccordionContent>
-                <div className='flex flex-wrap w-full mt-2'>
+                <div className='flex flex-wrap w-full my-3'>
                   {sections && (
                     sections.map((section, index) => (
-                      <div key={index} className='space-y-1 mb-3' >
+                      <div key={index} className='mb-2 gap-x-1'>
                         <DocumentViewer name={section.metadata?.fileName!} source={section.metadata?.sourcePage!} section={section}>
                           <Badge className="text-xs cursor-pointer">{section.metadata?.fileName ?? 'unknown'} @ P{section.metadata?.loc?.pageNumber}</Badge>
                         </DocumentViewer>
@@ -151,6 +108,7 @@ export function VectorMessage({
                   </div>
                 )}
               </AccordionContent>
+
 
               {/* <SheetContent className='w-[500px]'>
                 <ScrollArea className="h-full w-full">
@@ -196,47 +154,7 @@ export function BotMessage({
         <IconOpenAI />
       </div>
       <div className="ml-4 flex-1 space-y-2 overflow-hidden px-1">
-        <MemoizedReactMarkdown
-          className="prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0"
-          remarkPlugins={[remarkGfm, remarkMath]}
-          components={{
-            p({ children }) {
-              return <p className="mb-2 last:mb-0">{children}</p>
-            },
-            code({ node, inline, className, children, ...props }) {
-              if (children.length) {
-                if (children[0] == '▍') {
-                  return (
-                    <span className="mt-1 animate-pulse cursor-default">▍</span>
-                  )
-                }
-
-                children[0] = (children[0] as string).replace('`▍`', '▍')
-              }
-
-              const match = /language-(\w+)/.exec(className || '')
-
-              if (inline) {
-                return (
-                  <code className={className} {...props}>
-                    {children}
-                  </code>
-                )
-              }
-
-              return (
-                <CodeBlock
-                  key={Math.random()}
-                  language={(match && match[1]) || ''}
-                  value={String(children).replace(/\n$/, '')}
-                  {...props}
-                />
-              )
-            }
-          }}
-        >
-          {text}
-        </MemoizedReactMarkdown>
+        <MarkdownWrapper text={text} />
       </div>
     </div>
   )
