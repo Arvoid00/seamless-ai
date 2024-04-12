@@ -90,9 +90,9 @@ export function VectorMessage({
                   {sections && (
                     sections.map((section, index) => (
                       <div key={index} className='mb-2 gap-x-1'>
-                        <DocumentViewer name={section.metadata?.fileName!} source={section.metadata?.sourcePage!} section={section}>
-                          <Badge className="text-xs cursor-pointer">{section.metadata?.fileName ?? 'unknown'} @ P{section.metadata?.loc?.pageNumber}</Badge>
-                        </DocumentViewer>
+                        {section.metadata?.fileName && <DocumentViewer name={section.metadata?.fileName!} source={section.metadata?.sourcePage!} section={section}>
+                          <Badge className="text-xs cursor-pointer">{section.metadata.fileName} @ P{section.metadata?.loc?.pageNumber ?? ""}</Badge>
+                        </DocumentViewer>}
                         {/* <p className='text-xs text-gray-500'>Similarity score: {section.similarity}</p> */}
                       </div>
                     ))
@@ -108,7 +108,6 @@ export function VectorMessage({
                   </div>
                 )}
               </AccordionContent>
-
 
               {/* <SheetContent className='w-[500px]'>
                 <ScrollArea className="h-full w-full">
