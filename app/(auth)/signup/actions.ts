@@ -3,7 +3,7 @@
 import { signIn } from '@/auth'
 import { ResultCode, getStringFromBuffer } from '@/lib/utils'
 import { z } from 'zod'
-import { kv } from '@vercel/kv'
+// import { kv } from '@vercel/kv'
 import { getUser } from '../actions'
 import { AuthError } from 'next-auth'
 
@@ -12,7 +12,7 @@ export async function createUser(
   hashedPassword: string,
   salt: string
 ) {
-  const existingUser = await getUser(email)
+  const existingUser = await getUser()
 
   if (existingUser) {
     return {
@@ -27,7 +27,8 @@ export async function createUser(
       salt
     }
 
-    await kv.hmset(`user:${email}`, user)
+    // await kv.hmset(`user:${email}`, user)
+    console.error('User create function not implemented')
 
     return {
       type: 'success',
