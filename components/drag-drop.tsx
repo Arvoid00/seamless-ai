@@ -40,10 +40,10 @@ export default function DragAndDrop() {
             newFiles = e.target.files;
         }
 
-        if (newFiles != null) {
-            for (let i = 0; i < newFiles.length; i++) {
-                setFiles((prevState) => [...prevState, newFiles[i]]);
-            }
+        if (newFiles === null) return
+
+        for (let i = 0; i < newFiles.length; i++) {
+            if (newFiles[i] != null) setFiles((prevState) => [...prevState, newFiles[i]]);
         }
     }
 

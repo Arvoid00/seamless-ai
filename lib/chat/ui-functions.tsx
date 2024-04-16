@@ -131,7 +131,7 @@ export async function vectorSearch(query: string) {
         }
 
         // Perform text completion request
-
+        // @ts-ignore
         const completionOptions: CreateCompletionRequest = {
             model: 'gpt-4-turbo-preview',
             max_tokens: 512,
