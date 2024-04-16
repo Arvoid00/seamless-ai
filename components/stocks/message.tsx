@@ -110,7 +110,7 @@ export function VectorMessage({
               </AccordionContent>
 
               {/* <SheetContent className='w-[500px]'>
-                <ScrollArea className="h-full w-full">
+                <ScrollArea className="size-full">
                   <SheetHeader className='mb-5'>
                     <SheetTitle>Sources</SheetTitle>
                     <SheetDescription>

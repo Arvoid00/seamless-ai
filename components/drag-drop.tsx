@@ -43,6 +43,7 @@ export default function DragAndDrop() {
         if (newFiles === null) return
 
         for (let i = 0; i < newFiles.length; i++) {
+            // @ts-ignore
             if (newFiles[i] != null) setFiles((prevState) => [...prevState, newFiles[i]]);
         }
     }
