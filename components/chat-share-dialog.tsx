@@ -18,8 +18,8 @@ import { IconSpinner } from '@/components/ui/icons'
 import { useCopyToClipboard } from '@/lib/hooks/use-copy-to-clipboard'
 
 interface ChatShareDialogProps extends DialogProps {
-  chat: Pick<Chat, 'id' | 'title' | 'messages'>
-  shareChat: (id: string) => ServerActionResult<Chat>
+  chat: Chat //Pick<Chat, 'id' | 'title' | 'messages'>
+  shareChat: (chat: Chat) => ServerActionResult<Chat>
   onCopy: () => void
 }
 
@@ -37,6 +37,8 @@ export function ChatShareDialog({
       if (!chat.sharePath) {
         return toast.error('Could not copy share link to clipboard')
       }
+      console.log(chat.sharePath);
+
 
       const url = new URL(window.location.href)
       url.pathname = chat.sharePath
@@ -68,11 +70,18 @@ export function ChatShareDialog({
             onClick={() => {
               // @ts-ignore
               startShareTransition(async () => {
-                const result = await shareChat(chat.id)
+                const result = await shareChat(chat)
+                console.log('Share chat result:', result);
+
 
                 if (result && 'error' in result) {
                   toast.error(result.error)
                   return
+                }
+
+                if (!result || typeof result !== 'string') {
+                  console.error('Unexpected result from shareChat:', result);
+                  return;
                 }
 
                 copyShareLink(result)

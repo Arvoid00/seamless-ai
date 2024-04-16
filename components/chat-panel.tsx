@@ -70,9 +70,8 @@ export function ChatPanel({
             exampleMessages.map((example, index) => (
               <div
                 key={example.heading}
-                className={`cursor-pointer rounded-lg border bg-white p-4 hover:bg-zinc-50 dark:bg-zinc-950 dark:hover:bg-zinc-900 ${
-                  index > 1 && 'hidden md:block'
-                }`}
+                className={`cursor-pointer rounded-lg border bg-white p-4 hover:bg-zinc-50 dark:bg-zinc-950 dark:hover:bg-zinc-900 ${index > 1 && 'hidden md:block'
+                  }`}
                 onClick={async () => {
                   setMessages(currentMessages => [
                     ...currentMessages,
@@ -120,7 +119,10 @@ export function ChatPanel({
                     chat={{
                       id,
                       title,
-                      messages: aiState.messages
+                      messages: aiState.messages,
+                      createdAt: aiState.createdAt,
+                      userId: aiState.userId,
+                      path: `/chat/${id}`
                     }}
                   />
                 </>
