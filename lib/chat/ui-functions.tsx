@@ -118,8 +118,7 @@ export async function vectorSearch(query: string) {
         You are a very enthusiastic Supabase representative who loves
         to help people! Given the following documents, answer the question using only that information,
         outputted in markdown format. If you are unsure and the answer 
-        is not explicitly written in the documentation, say
-        "Sorry, I don't know how to help with that."
+        is not explicitly written in the documentation, say Sorry, I don't know how to help with that.
     
         Context sections:
         ${corpus}
@@ -190,7 +189,7 @@ export async function vectorSearch(query: string) {
 
         systemMessage.done(
             <SystemMessage>
-                Search results for "{query}" Corpus: {corpus} Reply: {reply}
+                Search results for {query} Corpus: {corpus} Reply: {reply}
             </SystemMessage>
         )
 
@@ -212,7 +211,7 @@ export async function vectorSearch(query: string) {
                 {
                     id: nanoid(),
                     role: 'system',
-                    content: `[The answer on the question "${query}" is "${reply}"]`
+                    content: `[The answer on the question ${query} is ${reply}]`
                 }
             ]
         })

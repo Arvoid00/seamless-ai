@@ -156,7 +156,7 @@ export default function DragAndDrop() {
                                 <div key={idx} className="flex flex-row space-x-5 items-center justify-between w-full">
                                     <div>{file.name}</div>
                                     <Button variant={"ghost"} onClick={() => removeFile(file.name, idx)}>
-                                        <Cross1Icon className="w-6 h-6 text-red-500 cursor-pointer" />
+                                        <Cross1Icon className="size-6 text-red-500 cursor-pointer" />
                                     </Button>
                                 </div>
                             ))}
