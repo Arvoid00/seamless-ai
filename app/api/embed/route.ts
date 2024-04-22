@@ -8,6 +8,9 @@ import { WebPDFLoader } from 'langchain/document_loaders/web/pdf'
 import { Document } from 'langchain/document'
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter'
 import { uploadFileToSupabase } from '@/app/docs/actions'
+import { SelectedTagsProps } from '@/components/drag-drop'
+import { Option } from '@/components/ui/multiple-selector'
+import { fetchWithRetry, retryOperation } from '@/lib/utils'
 
 // TODO: Rollback sequence if any of the steps fail
 
@@ -23,7 +26,8 @@ async function extractTextFromPDF(
   url: string,
   fileName: string
 ): Promise<FileContents> {
-  const response = await fetch(url)
+  console.log('Extracting text from PDF:', url)
+  const response = await fetchWithRetry(url)
   const data = await response.blob()
   const loader = new WebPDFLoader(data)
   const docs = await loader.load()
@@ -43,18 +47,11 @@ type ChunkObject = {
 }
 
 async function splitText(docs: Document[]) {
+  console.log('Splitting text into chunks:', docs.length)
   const splitter = new RecursiveCharacterTextSplitter({
     chunkSize: 1000,
     chunkOverlap: 100
   })
-
-  // const chunkObjects: ChunkObject[] = await Promise.all(
-  //   docs.map(async doc => ({
-  //     doc: doc,
-  //     chunk: doc.pageContent,
-  //     embedding: await generateEmbedding(doc.pageContent)
-  //   }))
-  // )
 
   const newDocs = await splitter.splitDocuments(docs)
 
@@ -65,7 +62,7 @@ async function splitText(docs: Document[]) {
       embedding: await generateEmbedding(doc.pageContent)
     }))
   )
-
+  console.log('Generated embeddings')
   return chunkObjects
 }
 
@@ -73,6 +70,7 @@ type FileDocument = {
   name: string
   pages: number
   hash: string
+  tags: Option[]
   publicUrl: string
   fileName: string
 }
@@ -81,6 +79,7 @@ async function insertDocument({
   name,
   pages,
   hash,
+  tags,
   publicUrl,
   fileName
 }: FileDocument) {
@@ -90,7 +89,7 @@ async function insertDocument({
     .from('documents')
     .insert({
       name,
-      metadata: { pages, hash, fileName },
+      metadata: { pages, hash, fileName, tags },
       source: publicUrl
     })
     .throwOnError()
@@ -98,6 +97,8 @@ async function insertDocument({
     .single()
 
   await supabase.from('document_owners').insert({ document_id: data.id }) // Implicitly uses the authenticated UserID as the owner
+
+  console.log('Inserted document:', data.id)
 
   return data
 }
@@ -132,41 +133,53 @@ async function insertDocumentSections({
   if (error) {
     throw new Error(`Error inserting document section: ${error.message}`)
   }
+  console.log('Inserted document sections')
 }
 
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData()
-    const files = Array.from(formData.values())
+    const files = formData.getAll('file')
+    const tagsEntry = formData.get('tags')
+    const tags = (
+      tagsEntry ? JSON.parse(String(tagsEntry)) : {}
+    ) as SelectedTagsProps
 
     for (const file of files) {
       if (!(file instanceof File)) {
         throw new Error('Invalid file type')
       }
+      const originalFileName = file.name
 
-      // @ts-expect-error
-      const { fileName, publicUrl } = await uploadFileToSupabase(file)
-      const { name, pages, hash, docs } = await extractTextFromPDF(
-        publicUrl,
-        fileName
+      const { fileName, publicUrl } = await retryOperation(() =>
+        // @ts-expect-error
+        uploadFileToSupabase(file)
+      )
+      const { name, pages, hash, docs } = await retryOperation(() =>
+        extractTextFromPDF(publicUrl, fileName)
       )
 
-      const chunks = await splitText(docs)
+      const chunks = await retryOperation(() => splitText(docs))
 
-      const { id } = await insertDocument({
-        name,
-        pages,
-        hash,
-        publicUrl,
-        fileName
-      })
+      const { id } = await retryOperation(() =>
+        insertDocument({
+          name,
+          pages,
+          hash,
+          tags: tags[originalFileName],
+          publicUrl,
+          fileName
+        })
+      )
 
-      await insertDocumentSections({
-        document_id: id,
-        chunks,
-        source: publicUrl,
-        fileName: fileName
-      })
+      await retryOperation(() =>
+        insertDocumentSections({
+          document_id: id,
+          chunks,
+          source: publicUrl,
+          fileName: fileName
+        })
+      )
     }
 
     return Response.json({

@@ -180,8 +180,7 @@ export const columns: ColumnDef<Document>[] = [
     },
     {
         id: "viewer",
-        cell: ({ row }) => <DocumentViewer name={row.original.name!} source={row.original.source!} />,
-
+        cell: ({ row }) => <DocumentViewer name={row.original.name!} source={row.original.source!} tags={row.original.metadata?.tags} />,
     },
     {
         id: "actions",

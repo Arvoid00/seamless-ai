@@ -18,12 +18,20 @@ import { Cross1Icon, Cross2Icon, CrossCircledIcon } from "@radix-ui/react-icons"
 import { useForm } from "react-hook-form";
 import { spinner } from "./stocks";
 import { toast } from "sonner";
+import TagSelector from "./tag-selector";
+import { Option } from "./ui/multiple-selector";
+import { getBytes } from "@/lib/utils";
+
+export type SelectedTagsProps = {
+    [key: string]: Option[]
+}
 
 export default function DragAndDrop() {
     const [dragActive, setDragActive] = useState(false);
     const [drawerOpen, setDrawerOpen] = useState(false);
     const inputRef = useRef<any>(null);
     const [files, setFiles] = useState<Blob[]>([]);
+    const [selectedTags, setSelectedTags] = useState<SelectedTagsProps>({});
     const router = useRouter();
     const {
         handleSubmit,
@@ -45,6 +53,7 @@ export default function DragAndDrop() {
         for (let i = 0; i < newFiles.length; i++) {
             // @ts-ignore
             if (newFiles[i] != null) setFiles((prevState) => [...prevState, newFiles[i]]);
+            if (newFiles[i] != null) setSelectedTags({ ...selectedTags, [newFiles[i].name]: [] });
         }
     }
 
@@ -55,7 +64,8 @@ export default function DragAndDrop() {
         }
 
         const formData = new FormData();
-        files.forEach((file, idx) => formData.append(`file-${idx}`, file));
+        files.forEach((file, idx) => formData.append(`file`, file));
+        formData.append("tags", JSON.stringify(selectedTags));
 
         const result = await fetch('/api/embed', {
             method: 'POST',
@@ -66,6 +76,7 @@ export default function DragAndDrop() {
 
         data.success ? toast.success(data.message) : toast.error(data.message)
         setFiles([]);
+        setSelectedTags({});
         setDrawerOpen(false);
         router.refresh()
     }
@@ -78,6 +89,7 @@ export default function DragAndDrop() {
         if (files && files[0]) {
             for (let i = 0; i < files["length"]; i++) {
                 setFiles((prevState: any) => [...prevState, files[i]]);
+                setSelectedTags({ ...selectedTags, [files[i].name]: [] });
             }
         }
     }
@@ -105,6 +117,7 @@ export default function DragAndDrop() {
         newArr.splice(idx, 1);
         setFiles([]);
         setFiles(newArr);
+        setSelectedTags({ ...selectedTags, [fileName]: [] });
     }
 
     function openFileExplorer() {
@@ -152,10 +165,14 @@ export default function DragAndDrop() {
                             to upload
                         </p>
 
-                        <div className="flex flex-col items-center p-3">
+                        <div className="flex flex-col p-3 w-[80%] space-y-2">
                             {files.map((file: any, idx: any) => (
-                                <div key={idx} className="flex flex-row space-x-5 items-center justify-between w-full">
-                                    <div>{file.name}</div>
+                                <div key={idx} className="flex flex-row space-x-5 justify-between border rounded-lg p-4 items-center">
+                                    <div className="flex flex-col justify-start text-start space-y-1 w-full">
+                                        <div className="flex">{file.name} <div className="text-sm ml-auto min-w-16 text-right">{getBytes(file.size)}</div></div>
+                                        <TagSelector selectedTags={selectedTags} setSelectedTags={setSelectedTags} forFile={file.name} />
+                                    </div>
+
                                     <Button variant={"ghost"} onClick={() => removeFile(file.name, idx)}>
                                         <Cross1Icon className="size-6 text-red-500 cursor-pointer" />
                                     </Button>

@@ -47,7 +47,8 @@ export async function generateEmbedding(content: string): Promise<number[]> {
   const { data: [{ embedding }] } = await openai.embeddings.create({
     input: content,
     model: 'text-embedding-3-small'
-  })
+  },
+    { timeout: 10000, headers: { 'Connection': 'keep-alive' } })
   return embedding
 }
 
@@ -59,6 +60,7 @@ async function getVectorResult(query: string) {
     headers: {
       'Content-Type': 'application/json'
     },
+
     body: `{"query":"${query}"}`
   };
 

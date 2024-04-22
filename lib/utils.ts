@@ -96,3 +96,79 @@ export const getBytes = (bytes: any) => {
     (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sufixes[i]
   )
 }
+
+export async function fetchWithRetry(
+  url: string,
+  options = {},
+  retries = 3,
+  backoff = 300
+) {
+  try {
+    const response = await fetch(url, options)
+    if (!response.ok) {
+      // Checks if the status code is outside of 2xx
+      if (retries > 0 && [429, 500, 502, 503, 504].includes(response.status)) {
+        console.log(`Retrying... ${retries} attempts left`)
+        await new Promise(resolve => setTimeout(resolve, backoff))
+        return fetchWithRetry(url, options, retries - 1, backoff * 2) // Exponential backoff
+      }
+      throw new Error(`HTTP Error: ${response.status}`)
+    }
+    return response
+  } catch (error) {
+    if (retries > 0) {
+      console.log(`Retrying... ${retries} attempts left, error: ${error}`)
+      await new Promise(resolve => setTimeout(resolve, backoff))
+      return fetchWithRetry(url, options, retries - 1, backoff * 2)
+    }
+    throw new Error(`Network error: ${error}`)
+  }
+}
+
+export async function retryOperation(
+  operation: any,
+  retries = 3,
+  backoff = 300
+) {
+  try {
+    return await operation()
+  } catch (error) {
+    if (retries > 0) {
+      console.log(
+        `Retry in ${backoff}ms, ${retries} retries left. Error: ${error.message}`
+      )
+      await new Promise(resolve => setTimeout(resolve, backoff))
+      return retryOperation(operation, retries - 1, backoff * 2)
+    }
+    throw error // Re-throw the error after final retry fails
+  }
+}
+
+export async function retrySupabaseOperation(
+  operation: any,
+  retries = 3,
+  backoff = 300
+) {
+  try {
+    const { data, error, status } = await operation()
+    if (error && status !== 404) {
+      // Usually, 404 is not retryable
+      if (retries > 0 && [429, 500, 502, 503, 504].includes(status)) {
+        console.log(`Retrying Supabase operation... ${retries} attempts left`)
+        await new Promise(resolve => setTimeout(resolve, backoff))
+        return retrySupabaseOperation(operation, retries - 1, backoff * 2)
+      }
+      throw new Error(`Supabase Error: ${error.message}`)
+    }
+    return { data, error }
+  } catch (error) {
+    if (retries > 0) {
+      console.log(
+        `Retrying Supabase operation... ${retries} attempts left, error: ${error}`
+      )
+      await new Promise(resolve => setTimeout(resolve, backoff))
+      return retrySupabaseOperation(operation, retries - 1, backoff * 2)
+    }
+    throw new Error(`Supabase operation failed: ${error}`)
+  }
+}

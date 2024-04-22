@@ -12,12 +12,12 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet"
-import { set } from "date-fns"
-import { get } from "http"
 import Image from "next/image"
 import { useEffect, useState } from "react"
+import { Option } from "./ui/multiple-selector"
+import { Badge } from "./ui/badge"
 
-export function DocumentViewer({ children, source, name, section }: { children?: React.ReactNode, source: string, name: string, section?: PageSection }) {
+export function DocumentViewer({ children, source, name, section, tags }: { children?: React.ReactNode, source: string, name: string, section?: PageSection, tags?: Option[] }) {
     const [error, setError] = useState(false)
 
     useEffect(() => {
@@ -40,6 +40,11 @@ export function DocumentViewer({ children, source, name, section }: { children?:
                     {/* <SheetDescription>
                         View the document here.
                     </SheetDescription> */}
+                    {tags && tags.length > 0 && <div className="flex flex-wrap gap-2">
+                        {tags?.map((tag, idx) => (
+                            <Badge key={idx}>{tag.label}</Badge>
+                        ))}
+                    </div>}
                 </SheetHeader>
                 {error ? (
                     <div className="flex flex-col justify-center items-center w-full h-[80%]">

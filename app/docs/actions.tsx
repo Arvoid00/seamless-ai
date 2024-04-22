@@ -34,6 +34,7 @@ export async function deleteDocument(id: number) {
 }
 
 export async function uploadFileToSupabase(file: File) {
+    console.log('Uploading file', file.name)
     const safeFileName = file.name.replace(/[^0-9a-zA-Z!-_.*'()]/g, '_')
     const supabase = createClient()
     const { data: obj, error } = await supabase.storage
