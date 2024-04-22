@@ -58,9 +58,14 @@ export function Header() {
       <Button variant="link" asChild>
         <Link href="/">Home</Link>
       </Button>
-      <Button variant="link" asChild>
-        <Link href="/docs">Doc Manager</Link>
-      </Button>
+      <div className='flex'>
+        <Button variant="link" asChild>
+          <Link href="/docs">Doc Manager</Link>
+        </Button>
+        <Button variant="link" asChild>
+          <Link href="/tags">Tag Manager</Link>
+        </Button>
+      </div>
 
       {/* <div className="flex items-center justify-end space-x-2">
         <a

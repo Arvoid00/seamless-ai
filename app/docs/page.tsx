@@ -19,7 +19,7 @@ export default async function DocsPage() {
                 <DragAndDrop />
             </header>
             <main className="flex-1 p-4 md:p-6">
-                {error ? <div>Error loading documents. <pre>{JSON.stringify(error, null, 2)}</pre></div> : <DataTable data={documents ?? []} columns={columns} />}
+                {error ? <div>Error loading documents. <pre>{JSON.stringify(error, null, 2)}</pre></div> : <DataTable data={documents ?? []} columns={columns} tablePluralName='documents' />}
             </main>
         </div>
     )
