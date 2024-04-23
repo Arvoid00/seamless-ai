@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 import { labels } from "@/components/table/data"
-import { Document, documentSchema } from "@/components/table/schema"
+import { SupabaseDocument } from "@/lib/supabase"
 import { deleteDocument, deleteFileObject } from "./actions"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
@@ -32,7 +32,7 @@ interface DataTableRowActionsProps<TData> {
 export function DocumentsRowActions<TData>({
     row,
 }: DataTableRowActionsProps<TData>) {
-    const doc = row.original as Document
+    const doc = row.original as SupabaseDocument
     const router = useRouter()
 
     async function handleFileDelete(e: React.MouseEvent) {

@@ -1,5 +1,8 @@
+"use server"
+import "server-only"
+
 import { createClient } from "@/utils/supabase/server"
-import { Tag } from "./columns"
+import { Tag } from "@/lib/supabase"
 
 export async function getTags() {
     const supabase = createClient()
