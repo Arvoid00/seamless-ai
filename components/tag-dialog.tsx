@@ -19,9 +19,11 @@ import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessa
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil2Icon } from "@radix-ui/react-icons";
-import { createTag } from "@/app/tags/actions";
+import { createTag, upsertTag } from "@/app/tags/actions";
 import { DropdownMenuItem } from "./ui/dropdown-menu";
-import { Tag } from "@/lib/supabase";
+import { SupabaseTag } from "@/lib/supabase";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { TAG_COLORS, useTags } from "@/lib/hooks/use-tags";
 
 export type TagSchema = z.infer<typeof TagSchema>;
 
@@ -37,6 +39,9 @@ const TagSchema = z.object({
     group: z.string().min(1, {
         message: "Group cannot be empty",
     }),
+    color: z.string().min(1, {
+        message: "Color cannot be empty",
+    }),
     created_at: z.string().optional(),
 });
 
@@ -44,17 +49,19 @@ type TagDialogProps = {
     title: string;
     action: string;
     open?: boolean;
-    tag?: Tag;
+    tag?: SupabaseTag;
 }
 
-const ProjectDialog = ({ title, action, open, tag }: TagDialogProps) => {
+const TagDialog = ({ title, action, open, tag }: TagDialogProps) => {
     const [isOpen, setIsOpen] = useState(open ?? false);
     const router = useRouter();
+    const { setTags } = useTags();
 
     const defaultValues = {
         name: tag?.name ?? "",
         value: tag?.value ?? "",
         group: tag?.group ?? "",
+        color: tag?.color ?? "",
     }
 
     const form = useForm<z.infer<typeof TagSchema>>({
@@ -74,24 +81,12 @@ const ProjectDialog = ({ title, action, open, tag }: TagDialogProps) => {
             let values =
                 action === "edit"
                     ? { id: tag?.id, ...tagObj }
-                    : tagObj;
-            console.log(values);
+                    : tagObj
+            // console.log(values);
 
-            const { data, error } = await createTag(values);
+            const { data, error } = await upsertTag(values);
 
-            if (error) {
-                setIsOpen(false);
-                toast.error("An error occurred!", {
-                    description: error.message,
-                });
-            } else {
-                toast.success(
-                    `Tag successfully ${action === "edit" ? "edited" : "created"
-                    }!`
-                );
-                router.refresh();
-                setIsOpen(false);
-            }
+            setTags((tags) => [...tags, data]);
         }
     };
 
@@ -179,6 +174,33 @@ const ProjectDialog = ({ title, action, open, tag }: TagDialogProps) => {
                                         </FormItem>
                                     )}
                                 />
+                                <FormField
+                                    control={control}
+                                    name="color"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Color</FormLabel>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select a color" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    {TAG_COLORS.map((color) => (
+                                                        <SelectItem key={color} value={color}>
+                                                            <div
+                                                                className="h-4 w-4 rounded-full"
+                                                                style={{ backgroundColor: color }}
+                                                            />
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
                                 {/* <FormField
                                     control={control}
                                     name="is_active"
@@ -221,4 +243,4 @@ const ProjectDialog = ({ title, action, open, tag }: TagDialogProps) => {
     );
 }
 
-export default ProjectDialog;
+export default TagDialog;

@@ -46,7 +46,7 @@ export type RPCResponse = {
 }
 
 export async function POST(req: Request, res: NextApiResponse) {
-  const { query } = await req.json()
+  const { query, tags } = await req.json()
   const sanitizedQuery = query.replace(/[^a-zA-Z0-9\s]/g, '').trim()
 
   const supabase = createClient(
@@ -82,13 +82,17 @@ export async function POST(req: Request, res: NextApiResponse) {
   // )
   // console.log(resultA)
 
+  console.log('Query:', sanitizedQuery)
+  console.log('Tags:', tags)
+
   const embedding = await generateEmbedding(sanitizedQuery)
 
   const { error: matchError, data: pageSections }: RPCResponse =
     await supabase.rpc('match_documents_new', {
       query_embedding: embedding,
       match_threshold: 0.0, //0.78,
-      match_count: 5
+      match_count: 5,
+      tags: tags.map((tag: any) => tag.value)
       // min_content_length: 50
     })
 

@@ -7,27 +7,22 @@ import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui
 import { Command as CommandPrimitive, useCommandState } from 'cmdk';
 import { useEffect, forwardRef } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
+import { capitalizeFirstLetter, cn } from '@/lib/utils';
 import { SelectedTagsProps } from '../drag-drop';
+import { SupabaseTag } from '@/lib/supabase';
+import { badgeStyle, pickRandomColor } from '@/lib/hooks/use-tags';
+import { createTag } from '@/app/tags/actions';
+import { toast } from 'sonner';
 
-export interface Option {
-    value: string;
-    label: string;
-    disable?: boolean;
-    /** fixed option that can't be removed. */
-    fixed?: boolean;
-    /** Group the options by providing key. */
-    [key: string]: string | boolean | undefined;
-}
 interface GroupOption {
-    [key: string]: Option[];
+    [key: string]: SupabaseTag[];
 }
 
 interface MultipleSelectorProps {
-    value?: Option[];
-    defaultOptions?: Option[];
+    value?: SupabaseTag[];
+    defaultOptions?: SupabaseTag[];
     /** manually controlled options */
-    options?: Option[];
+    options?: SupabaseTag[];
     placeholder?: string;
     /** Loading component. */
     loadingIndicator?: React.ReactNode;
@@ -41,8 +36,8 @@ interface MultipleSelectorProps {
      **/
     triggerSearchOnFocus?: boolean;
     /** async search */
-    onSearch?: (value: string) => Promise<Option[]>;
-    onChange?: (options: Option[]) => void;
+    onSearch?: (value: string) => Promise<SupabaseTag[]>;
+    onChange?: (options: SupabaseTag[]) => void;
     /** Limit the maximum number of selected options. */
     maxSelected?: number;
     /** When the number of selected options exceeds the limit, the onMaxSelected will be called. */
@@ -71,12 +66,12 @@ interface MultipleSelectorProps {
         'value' | 'placeholder' | 'disabled'
     >;
     selected: SelectedTagsProps;
-    setSelected: (selected: SelectedTagsProps) => React.Dispatch<React.SetStateAction<SelectedTagsProps>>;
+    setSelected: React.Dispatch<React.SetStateAction<SelectedTagsProps>>;
     forFile: string;
 }
 
 export interface MultipleSelectorRef {
-    selectedValue: Option[];
+    selectedValue: SupabaseTag[];
     input: HTMLInputElement;
 }
 
@@ -94,7 +89,7 @@ export function useDebounce<T>(value: T, delay?: number): T {
     return debouncedValue;
 }
 
-function transToGroupOption(options: Option[], groupBy?: string) {
+function transToGroupOption(options: SupabaseTag[], groupBy?: string) {
     if (options.length === 0) {
         return {};
     }
@@ -106,7 +101,7 @@ function transToGroupOption(options: Option[], groupBy?: string) {
 
     const groupOption: GroupOption = {};
     options.forEach((option) => {
-        const key = (option[groupBy] as string) || '';
+        const key = (option[groupBy as keyof SupabaseTag] as string) || '';
         if (!groupOption[key]) {
             groupOption[key] = [];
         }
@@ -115,11 +110,14 @@ function transToGroupOption(options: Option[], groupBy?: string) {
     return groupOption;
 }
 
-function removePickedOption(groupOption: GroupOption, picked: Option[]) {
+function removePickedOption(groupOption: GroupOption, picked: SupabaseTag[]) {
     const cloneOption = JSON.parse(JSON.stringify(groupOption)) as GroupOption;
 
     for (const [key, value] of Object.entries(cloneOption)) {
         cloneOption[key] = value.filter((val) => !picked.find((p) => p.value === val.value));
+        if (cloneOption[key].length === 0) {
+            delete cloneOption[key]; // Remove the group if all its options are picked
+        }
     }
     return cloneOption;
 }
@@ -203,7 +201,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
         );
 
         const handleUnselect = React.useCallback(
-            (option: Option) => {
+            (option: SupabaseTag) => {
                 const newOptions = currentFileTags.filter((s) => s.value !== option.value);
                 setSelected({ ...selected, [forFile]: newOptions });
                 onChange?.(newOptions);
@@ -280,15 +278,26 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                         e.preventDefault();
                         e.stopPropagation();
                     }}
-                    onSelect={(value: string) => {
+                    onSelect={async (value: string) => {
                         if (currentFileTags.length >= maxSelected) {
                             onMaxSelected?.(currentFileTags.length);
                             return;
                         }
                         setInputValue('');
-                        const newOptions = [...currentFileTags, { value, label: value }];
+                        const newOption = {
+                            name: capitalizeFirstLetter(value),
+                            value: value.replace(/\s+/g, '-').toLowerCase(),
+                            group: capitalizeFirstLetter(prompt('Provide group for tag') || ''),
+                            color: pickRandomColor(),
+                        }
+                        const { data, error } = await createTag(newOption)
+                        if (error) {
+                            toast.error('Error creating tag:', { description: error.message })
+                            return
+                        }
+                        const newOptions = [...currentFileTags, data];
                         setSelected({ ...selected, [forFile]: newOptions });
-                        onChange?.(newOptions);
+                        onChange?.(data);
                     }}
                 >{`Create "${inputValue}"`}</CommandItem>
             );
@@ -363,21 +372,27 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                     <div className="flex flex-wrap gap-1">
                         {currentFileTags.map((option) => {
                             return (
+                                // <Badge
+                                //     key={option.value}
+                                //     className={cn(
+                                //         'data-[disabled]:bg-muted-foreground data-[disabled]:text-muted data-[disabled]:hover:bg-muted-foreground',
+                                //         'data-[fixed]:bg-muted-foreground data-[fixed]:text-muted data-[fixed]:hover:bg-muted-foreground',
+                                //         badgeClassName,
+                                //     )}
+                                //     // data-fixed={option.fixed}
+                                //     data-disabled={disabled}
+                                // >
                                 <Badge
                                     key={option.value}
-                                    className={cn(
-                                        'data-[disabled]:bg-muted-foreground data-[disabled]:text-muted data-[disabled]:hover:bg-muted-foreground',
-                                        'data-[fixed]:bg-muted-foreground data-[fixed]:text-muted data-[fixed]:hover:bg-muted-foreground',
-                                        badgeClassName,
-                                    )}
-                                    data-fixed={option.fixed}
-                                    data-disabled={disabled}
+                                    variant="outline"
+                                    style={badgeStyle(option.color)}
+                                    className="mr-1 capitalize"
                                 >
-                                    {option.label}
+                                    {option.name}
                                     <button
                                         className={cn(
                                             'ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2',
-                                            (disabled || option.fixed) && 'hidden',
+                                            // (disabled || option.fixed) && 'hidden',
                                         )}
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter') {
@@ -440,7 +455,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                                                         <CommandItem
                                                             key={option.value}
                                                             value={option.value}
-                                                            disabled={option.disable}
+                                                            // disabled={option.disable}
                                                             onMouseDown={(e) => {
                                                                 e.preventDefault();
                                                                 e.stopPropagation();
@@ -454,13 +469,20 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                                                                 const newOptions = [...currentFileTags, option];
                                                                 setSelected({ ...selected, [forFile]: newOptions });
                                                                 onChange?.(newOptions);
+
                                                             }}
                                                             className={cn(
                                                                 'cursor-pointer',
-                                                                option.disable && 'cursor-default text-muted-foreground',
+                                                                // option.disable && 'cursor-default text-muted-foreground',
                                                             )}
                                                         >
-                                                            {option.label}
+                                                            <Badge
+                                                                key={option.value}
+                                                                variant="outline"
+                                                                style={badgeStyle(option.color)}
+                                                            >
+                                                                {option.name}
+                                                            </Badge>
                                                         </CommandItem>
                                                     );
                                                 })}

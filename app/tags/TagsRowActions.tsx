@@ -19,44 +19,38 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 import { labels } from "@/components/table/data"
-import { SupabaseDocument } from "@/lib/supabase"
-import { deleteDocument, deleteFileObject } from "./actions"
+import { SupabaseTag } from "@/lib/supabase"
+import { deleteTag } from "./actions"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
-import { PageSection } from "../vectorsearch/route"
+import TagDialog from "@/components/tag-dialog"
+import { useTags } from "@/lib/hooks/use-tags"
 
 interface DataTableRowActionsProps<TData> {
     row: Row<TData>
 }
 
-type DocMetadata = {
-    fileName?: string
-} & JSON
-
-export function DocumentsRowActions<TData>({
+export function TagsRowActions<TData extends SupabaseTag>({
     row,
 }: DataTableRowActionsProps<TData>) {
-    const doc = row.original as SupabaseDocument
+    const tag = row.original
     const router = useRouter()
+    const { setTags } = useTags()
 
-    async function handleFileDelete(e: React.MouseEvent) {
+    async function handleTagDelete(e: React.MouseEvent) {
         e.preventDefault()
-        const fileName = (doc.metadata as unknown as DocMetadata).fileName
-        console.log("Deleting file", fileName)
+        console.log("Deleting tag", tag.name)
         try {
-            if (!fileName) throw new Error("No file name found")
-            const { error } = await deleteFileObject(fileName)
+            const { error } = await deleteTag(tag.id)
             if (error) throw error
-            const { data } = await deleteDocument(doc.id!)
-            console.log(data)
-            toast.success("File deleted!")
+            toast.success("Tag deleted!")
+            setTags((tags) => tags.filter((t) => t.id !== tag.id))
             router.refresh()
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error)
-            toast.error("Error deleting file", { description: errorMessage })
+            toast.error("Error deleting tag", { description: errorMessage })
         }
     }
-
 
     return (
         <DropdownMenu>
@@ -83,11 +77,16 @@ export function DocumentsRowActions<TData>({
                             ))}
                         </DropdownMenuRadioGroup>
                     </DropdownMenuSubContent>
-                </DropdownMenuSub> 
-                <DropdownMenuSeparator /> */}
-                <DropdownMenuItem onClick={(e) => handleFileDelete(e)} className="cursor-pointer hover:bg-destructive-foreground">
-                    Delete
+                </DropdownMenuSub> */}
+
+                <DropdownMenuItem asChild>
+                    <TagDialog tag={row.original} title={"Edit Tag"} action={"edit"} />
                     {/* <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut> */}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleTagDelete}>
+                    Delete
+                    <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>

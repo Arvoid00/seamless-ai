@@ -31,6 +31,8 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { DocumentViewer } from '../document-view-sheet'
 import { MarkdownWrapper } from '../markdown'
+import { SupabaseTag } from '@/lib/supabase'
+import { badgeStyle } from '@/lib/hooks/use-tags'
 
 // Different types of message bubbles.
 
@@ -51,11 +53,13 @@ export function VectorMessage({
   data,
   usage,
   sections,
+  tags,
   className
 }: {
   // content: string | StreamableValue<string>
   data: any
   usage?: { prompt_tokens: number, completion_tokens: number, total_tokens: number }
+  tags?: SupabaseTag[]
   sections: PageSection[]
   className?: string
 }) {
@@ -107,6 +111,20 @@ export function VectorMessage({
                     </p>
                   </div>
                 )}
+
+                {tags && tags.length ? <div className='flex text-sm my-2'>
+                  <span className='mr-5'>Tags used to retrieve content: </span>
+                  <div>{tags.map(({ name, value, color }) => (
+                    <Badge
+                      key={value}
+                      variant="outline"
+                      style={badgeStyle(color)}
+                      className="mr-1 mb-1"
+                    >
+                      {name}
+                    </Badge>
+                  ))}</div>
+                </div> : null}
               </AccordionContent>
 
               {/* <SheetContent className='w-[500px]'>

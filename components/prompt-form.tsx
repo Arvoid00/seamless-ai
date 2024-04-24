@@ -17,6 +17,8 @@ import {
 import { useEnterSubmit } from '@/lib/hooks/use-enter-submit'
 import { nanoid } from 'nanoid'
 import { useRouter } from 'next/navigation'
+import { CommandMenu } from './command-menu'
+import { useTags } from '@/lib/hooks/use-tags'
 
 export function PromptForm({
   input,
@@ -30,6 +32,7 @@ export function PromptForm({
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
   const { submitUserMessage } = useActions()
   const [_, setMessages] = useUIState<typeof AI>()
+  const { selectedTags } = useTags()
 
   React.useEffect(() => {
     if (inputRef.current) {
@@ -62,14 +65,16 @@ export function PromptForm({
         ])
 
         // Submit and get response message
-        const responseMessage = await submitUserMessage(value)
+        const body = { content: value, tags: selectedTags }
+        const responseMessage = await submitUserMessage(body)
         setMessages(currentMessages => [...currentMessages, responseMessage])
       }}
     >
       <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-8 sm:rounded-md sm:border sm:px-12">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
+            <CommandMenu />
+            {/* <Button
               variant="outline"
               size="icon"
               className="absolute left-0 top-[14px] size-8 rounded-full bg-background p-0 sm:left-4"
@@ -78,10 +83,10 @@ export function PromptForm({
               }}
             >
               <IconPlus />
-              <span className="sr-only">New Chat</span>
-            </Button>
+              <span className="sr-only">Settings</span>
+            </Button> */}
           </TooltipTrigger>
-          <TooltipContent>New Chat</TooltipContent>
+          <TooltipContent>Settings</TooltipContent>
         </Tooltip>
         <Textarea
           ref={inputRef}
@@ -110,6 +115,6 @@ export function PromptForm({
           </Tooltip>
         </div>
       </div>
-    </form>
+    </form >
   )
 }

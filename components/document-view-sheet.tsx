@@ -14,10 +14,11 @@ import {
 } from "@/components/ui/sheet"
 import Image from "next/image"
 import { useEffect, useState } from "react"
-import { Option } from "./ui/multiple-selector"
 import { Badge } from "./ui/badge"
+import { badgeStyle } from "@/lib/hooks/use-tags"
+import { SupabaseTag } from "@/lib/supabase"
 
-export function DocumentViewer({ children, source, name, section, tags }: { children?: React.ReactNode, source: string, name: string, section?: PageSection, tags?: Option[] }) {
+export function DocumentViewer({ children, source, name, section, tags }: { children?: React.ReactNode, source: string, name: string, section?: PageSection, tags?: SupabaseTag[] }) {
     const [error, setError] = useState(false)
 
     useEffect(() => {
@@ -42,7 +43,14 @@ export function DocumentViewer({ children, source, name, section, tags }: { chil
                     </SheetDescription> */}
                     {tags && tags.length > 0 && <div className="flex flex-wrap gap-2">
                         {tags?.map((tag, idx) => (
-                            <Badge key={idx}>{tag.label}</Badge>
+                            <Badge
+                                key={tag.id}
+                                variant="outline"
+                                style={badgeStyle(tag.color)}
+                                className="mr-1 mb-1"
+                            >
+                                {tag.name}
+                            </Badge>
                         ))}
                     </div>}
                 </SheetHeader>

@@ -15,12 +15,13 @@ import { User } from '@supabase/supabase-js'
 
 export interface ChatProps extends React.ComponentProps<'div'> {
   initialMessages?: Message[]
+  title?: string
   id?: string
   user?: User
   missingKeys: string[]
 }
 
-export function Chat({ id, className, user, missingKeys }: ChatProps) {
+export function Chat({ id, title, className, user, missingKeys }: ChatProps) {
   const router = useRouter()
   const path = usePathname()
   const [input, setInput] = useState('')
@@ -75,6 +76,7 @@ export function Chat({ id, className, user, missingKeys }: ChatProps) {
       </div>
       <ChatPanel
         id={id}
+        title={title}
         input={input}
         setInput={setInput}
         isAtBottom={isAtBottom}

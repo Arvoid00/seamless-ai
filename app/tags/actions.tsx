@@ -2,7 +2,7 @@
 import "server-only"
 
 import { createClient } from "@/utils/supabase/server"
-import { Tag } from "@/lib/supabase"
+import { SupabaseTag } from "@/lib/supabase"
 
 export async function getTags() {
     const supabase = createClient()
@@ -32,19 +32,28 @@ export async function getTagsByGroup(group: string) {
 
 export async function deleteTag(id: number) {
     const supabase = createClient()
-    const { data } = await supabase
+    const { data, error } = await supabase
         .from('tags')
         .delete()
         .eq('id', id)
         .throwOnError()
-    return { data }
+    return { data, error }
 }
 
-
-export async function createTag(tag: Tag) {
+export async function createTag(tag: Partial<SupabaseTag>) {
     const supabase = createClient()
     const { data, error } = await supabase
         .from('tags')
         .insert(tag)
+        .select('*').single()
+    return { data, error }
+}
+
+export async function upsertTag(tag: Partial<SupabaseTag>) {
+    const supabase = createClient()
+    const { data, error } = await supabase
+        .from('tags')
+        .upsert(tag)
+        .select('*').single()
     return { data, error }
 }

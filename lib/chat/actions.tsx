@@ -37,6 +37,7 @@ import { Chat } from '@/lib/types'
 import { getUser } from '@/app/(auth)/actions'
 import { confirmPurchase, vectorSearch } from './ui-functions'
 import { VectorResponse } from '@/app/vectorsearch/route'
+import { SupabaseTag } from '../supabase'
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || ''
 const openai = new OpenAI({
@@ -52,16 +53,20 @@ export async function generateEmbedding(content: string): Promise<number[]> {
   return embedding
 }
 
-async function getVectorResult(query: string) {
+async function getVectorResult(query: string, tags: SupabaseTag[]) {
   let url = `http://localhost:3000/vectorsearch`;
+
+  const body = {
+    query,
+    tags
+  }
 
   let options = {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-
-    body: `{"query":"${query}"}`
+    body: JSON.stringify(body)
   };
 
   const response = await fetch(url, options)
@@ -69,12 +74,13 @@ async function getVectorResult(query: string) {
   return vectorResponse
 }
 
-async function submitUserMessage(content: string) {
+async function submitUserMessage({ content, tags }: { content: string, tags: SupabaseTag[] }) {
   'use server'
 
   const aiState = getMutableAIState<typeof AI>()
 
   console.log('User message:', content)
+  console.log('Tags:', tags)
 
   aiState.update({
     ...aiState.get(),
@@ -161,7 +167,7 @@ Besides that, you can also chat with users and do some calculations if needed.`
             </BotCard>
           )
 
-          const { data, usage, sections } = await getVectorResult(query)
+          const { data, usage, sections } = await getVectorResult(query, tags)
 
           aiState.done({
             ...aiState.get(),
@@ -171,14 +177,14 @@ Besides that, you can also chat with users and do some calculations if needed.`
                 id: nanoid(),
                 role: 'function',
                 name: 'vecSearch',
-                content: JSON.stringify({ data, usage, sections })
+                content: JSON.stringify({ data, usage, sections, tags })
               }
             ]
           })
 
           return (
             <BotCard>
-              <VectorMessage data={data} usage={usage} sections={sections} />
+              <VectorMessage data={data} usage={usage} sections={sections} tags={tags} />
               {/* <BotMessage content={`Result: ${data.message.content}`} /> */}
             </BotCard>
           )
@@ -469,7 +475,7 @@ export const getUIStateFromAIState = (aiState: Chat) => {
               <Events props={JSON.parse(message.content)} />
             </BotCard>
           ) : message.name === 'vecSearch' ? (
-            <VectorMessage data={JSON.parse(message.content).data} usage={JSON.parse(message.content).usage} sections={JSON.parse(message.content).sections} />
+            <VectorMessage data={JSON.parse(message.content).data} usage={JSON.parse(message.content).usage} sections={JSON.parse(message.content).sections} tags={JSON.parse(message.content).tags} />
           ) : null
         ) : message.role === 'user' ? (
           <UserMessage>{message.content}</UserMessage>

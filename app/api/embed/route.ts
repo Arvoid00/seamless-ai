@@ -9,8 +9,8 @@ import { Document } from 'langchain/document'
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter'
 import { uploadFileToSupabase } from '@/app/docs/actions'
 import { SelectedTagsProps } from '@/components/drag-drop'
-import { Option } from '@/components/ui/multiple-selector'
 import { fetchWithRetry, retryOperation } from '@/lib/utils'
+import { SupabaseTag } from '@/lib/supabase'
 
 // TODO: Rollback sequence if any of the steps fail
 
@@ -70,7 +70,7 @@ type FileDocument = {
   name: string
   pages: number
   hash: string
-  tags: Option[]
+  tags: SupabaseTag[]
   publicUrl: string
   fileName: string
 }

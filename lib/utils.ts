@@ -54,6 +54,9 @@ export const runAsyncFnWithoutBlocking = (
   fn()
 }
 
+export const capitalizeFirstLetter = (string: string) =>
+  string.charAt(0).toUpperCase() + string.slice(1)
+
 export const sleep = (ms: number) =>
   new Promise(resolve => setTimeout(resolve, ms))
 
@@ -135,7 +138,7 @@ export async function retryOperation(
   } catch (error) {
     if (retries > 0) {
       console.log(
-        `Retry in ${backoff}ms, ${retries} retries left. Error: ${error.message}`
+        `Retry in ${backoff}ms, ${retries} retries left. Error: ${error}`
       )
       await new Promise(resolve => setTimeout(resolve, backoff))
       return retryOperation(operation, retries - 1, backoff * 2)

@@ -19,11 +19,11 @@ import { useForm } from "react-hook-form";
 import { spinner } from "./stocks";
 import { toast } from "sonner";
 import TagSelector from "./tag-selector";
-import { Option } from "./ui/multiple-selector";
 import { getBytes } from "@/lib/utils";
+import { SupabaseTag } from "@/lib/supabase";
 
 export type SelectedTagsProps = {
-    [key: string]: Option[]
+    [key: string]: SupabaseTag[]
 }
 
 export default function DragAndDrop() {
@@ -168,7 +168,7 @@ export default function DragAndDrop() {
                         <div className="flex flex-col p-3 w-[80%] space-y-2">
                             {files.map((file: any, idx: any) => (
                                 <div key={idx} className="flex flex-row space-x-5 justify-between border rounded-lg p-4 items-center">
-                                    <div className="flex flex-col justify-start text-start space-y-1 w-full">
+                                    <div className="flex flex-col justify-start text-start space-y-2 w-full">
                                         <div className="flex">{file.name} <div className="text-sm ml-auto min-w-16 text-right">{getBytes(file.size)}</div></div>
                                         <TagSelector selectedTags={selectedTags} setSelectedTags={setSelectedTags} forFile={file.name} />
                                     </div>

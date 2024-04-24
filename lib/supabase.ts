@@ -6,7 +6,7 @@ export type DocumentOwner =
 export type DocumentSection =
   Database['public']['Tables']['document_sections']['Row']
 export type SupabaseDocument = Database['public']['Tables']['documents']['Row']
-export type Tag = Database['public']['Tables']['tags']['Row']
+export type SupabaseTag = Database['public']['Tables']['tags']['Row']
 
 export type Json =
   | string
@@ -27,13 +27,13 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
-          created_at?: string
+          created_at?: never
           id: string
           payload?: Json | null
           user_id?: string | null
         }
         Update: {
-          created_at?: string
+          created_at?: never
           id?: string
           payload?: Json | null
           user_id?: string | null
@@ -122,14 +122,14 @@ export type Database = {
           source: string | null
         }
         Insert: {
-          created_at?: string
+          created_at?: never
           id?: never
           metadata?: Json | null
           name: string
           source?: string | null
         }
         Update: {
-          created_at?: string
+          created_at?: never
           id?: never
           metadata?: Json | null
           name?: string
@@ -144,20 +144,23 @@ export type Database = {
           id: number
           name: string
           value: string
+          color: string
         }
         Insert: {
-          created_at?: string
+          created_at?: never
           group?: string | null
-          id?: number
+          id?: never
           name: string
           value: string
+          color?: string
         }
         Update: {
-          created_at?: string
+          created_at?: never
           group?: string | null
-          id?: number
+          id?: never
           name?: string
           value?: string
+          color?: string
         }
         Relationships: []
       }

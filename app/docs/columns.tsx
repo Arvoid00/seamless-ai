@@ -6,14 +6,13 @@ import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 
 import { labels, priorities, statuses } from "@/components/table/data"
-import { Document } from "@/components/table/schema"
 import { DataTableColumnHeader } from "@/components/table/data-table-column-header"
-import { DataTableRowActions } from "@/components/table//data-table-row-actions"
 import { formatDate } from "@/lib/utils"
 import { DocumentsRowActions } from "./DocumentsRowActions"
 import { DocumentViewer } from "@/components/document-view-sheet"
+import { Json, SupabaseDocument } from "@/lib/supabase"
 
-export const columns: ColumnDef<Document>[] = [
+export const columns: ColumnDef<SupabaseDocument>[] = [
     {
         id: "select",
         header: ({ table }) => (
@@ -53,7 +52,7 @@ export const columns: ColumnDef<Document>[] = [
             <DataTableColumnHeader column={column} title="Name" />
         ),
         cell: ({ row }) => {
-            const label = labels.find((label) => label.value === row.original.label)
+            const label = labels.find((label) => label.value === row.original.name)
 
             return (
                 <div className="flex space-x-2">
@@ -166,7 +165,7 @@ export const columns: ColumnDef<Document>[] = [
             <DataTableColumnHeader column={column} title="Uploaded at" />
         ),
         cell: ({ row }) => {
-            const label = labels.find((label) => label.value === row.original.label)
+            const label = labels.find((label) => label.value === row.original.name)
 
             return (
                 <div className="flex space-x-2">
@@ -180,6 +179,7 @@ export const columns: ColumnDef<Document>[] = [
     },
     {
         id: "viewer",
+        // @ts-ignore
         cell: ({ row }) => <DocumentViewer name={row.original.name!} source={row.original.source!} tags={row.original.metadata?.tags} />,
     },
     {
