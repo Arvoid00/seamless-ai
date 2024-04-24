@@ -22,8 +22,10 @@ import {
 import { useState, useEffect, useRef } from 'react'
 import { Button } from './ui/button'
 import { SelectTagsPopover } from './select-tags-popover'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, MoonIcon, SunIcon } from 'lucide-react'
 import { toast } from 'sonner'
+import { useCommandState } from 'cmdk'
+import { useTheme } from 'next-themes'
 
 const TRIGGER_KEY = 'k'
 
@@ -31,10 +33,9 @@ function PopoverCommandItemContent({ title, icon }: { title: string, icon: React
     return (
         <div className='flex'>
             <div className='flex'>
-                {icon}
-                <div>{title}</div>
+                {icon} {title}
             </div>
-            <ChevronRight className="size-5 ml-auto" />
+            {/* <ChevronRight className="size-5 ml-auto" /> */}
         </div>
     )
 }
@@ -43,6 +44,9 @@ export function CommandMenu() {
     const [open, setOpen] = useState(false)
     const [openCategoriesPopover, setOpenCategoriesPopover] = useState(false)
     const commandInputRef = useRef(null);
+    const [pages, setPages] = useState<string[]>([])
+    const page = pages[pages.length - 1]
+    const { setTheme, theme } = useTheme()
 
     useEffect(() => {
         const down = (e: KeyboardEvent) => {
@@ -54,6 +58,12 @@ export function CommandMenu() {
         document.addEventListener('keydown', down)
         return () => document.removeEventListener('keydown', down)
     }, [])
+
+    const SubItem = (props: any) => {
+        const search = useCommandState((state) => state.search)
+        if (!search) return null
+        return <CommandItem {...props} />
+    }
 
     return (
         <>
@@ -84,16 +94,49 @@ export function CommandMenu() {
                         </SelectTagsPopover>
                         <CommandItem onSelect={() => toast.message("Redirecting to Agents")}>
                             <RocketIcon className="size-5 mr-2" />
-                            <span>Go to Agent</span>
+                            Go to Agent
                         </CommandItem>
+                    </CommandGroup>
+                    <CommandSeparator />
+                    <CommandGroup heading="User">
                         <CommandItem onSelect={() => toast.message("Redirecting to Profile")}>
                             <PersonIcon className="size-5 mr-2" />
-                            <span>Profile</span>
+                            Profile
                         </CommandItem>
                         <CommandItem onSelect={() => toast.message("Redirecting to Settings")}>
                             <GearIcon className="size-5 mr-2" />
-                            <span>Settings</span>
+                            Settings
                         </CommandItem>
+                    </CommandGroup>
+                    <CommandGroup heading="Theme & Styling">
+                        <CommandItem onSelect={() => setTheme("dark")}><MoonIcon className="size-5 mr-2" />Change theme to dark</CommandItem>
+                        <CommandItem onSelect={() => setTheme("light")}><SunIcon className="size-5 mr-2" />Change theme to light</CommandItem>
+                        {/* <SubItem onSelect={() => { toast.message("Change theme to dark") }}>Change theme to dark</SubItem>
+                        <SubItem onSelect={() => { toast.message("Change theme to light") }}>Change theme to light</SubItem> */}
+                    </CommandGroup>
+
+                    <CommandSeparator />
+                    <CommandGroup heading="Projects & Teams">
+                        {!page && (
+                            <>
+                                <CommandItem onSelect={() => setPages([...pages, 'projects'])}>Search projects…</CommandItem>
+                                <CommandItem onSelect={() => setPages([...pages, 'teams'])}>Join a team…</CommandItem>
+                            </>
+                        )}
+
+                        {page === 'projects' && (
+                            <>
+                                <CommandItem onSelect={() => { toast.message("Project A"); setPages([...pages.filter(page => page != 'projects')]) }}>Project A</CommandItem>
+                                <CommandItem onSelect={() => { toast.message("Project B"); setPages([...pages.filter(page => page != 'projects')]) }}>Project B</CommandItem>
+                            </>
+                        )}
+
+                        {page === 'teams' && (
+                            <>
+                                <CommandItem onSelect={() => { toast.message("Team 1"); setPages([...pages.filter(page => page != 'teams')]) }}>Team 1</CommandItem>
+                                <CommandItem onSelect={() => { toast.message("Team 2"); setPages([...pages.filter(page => page != 'teams')]) }}>Team 2</CommandItem>
+                            </>
+                        )}
                     </CommandGroup>
                 </CommandList>
             </CommandDialog >

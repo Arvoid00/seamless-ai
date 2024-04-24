@@ -128,11 +128,11 @@ export default function DragAndDrop() {
     return (
         <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
             <DrawerTrigger className="" asChild><Button>Upload a document</Button></DrawerTrigger>
-            <DrawerContent>
-                <div className="flex items-center justify-center h-max p-8 ">
+            <DrawerContent className="min-h-[45%] max-h-max">
+                <div className="flex items-center justify-center py-8 h-full" >
                     <form
                         className={`${dragActive && "bg-blue-500/40 border-blue-500"
-                            }  p-4 w-3/4 rounded-lg  min-h-[10rem] text-center flex flex-col items-center justify-center border-2 border-dashed border-white`}
+                            }  p-4 w-[80%] rounded-lg h-full text-center flex flex-col items-center justify-center border-2 border-dashed border-white`}
                         onDragEnter={handleDragEnter}
                         onSubmit={handleSubmit(handleSubmitFiles)}
                         onDrop={handleDrop}
@@ -179,6 +179,7 @@ export default function DragAndDrop() {
                                 </div>
                             ))}
                         </div>
+
                         <DrawerFooter>
                             <div className="flex space-x-2">
                                 {files.length > 0 && <Button
