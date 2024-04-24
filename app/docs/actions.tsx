@@ -23,6 +23,17 @@ export async function getDocuments() {
     return { data, error }
 }
 
+export async function getDocumentByName(fileName: string) {
+    const supabase = createClient()
+    const { data, error } = await supabase
+        .from('documents')
+        .select()
+        .eq('name', fileName)
+        .limit(1)
+        .single()
+    return { data, error }
+}
+
 export async function deleteDocument(id: number) {
     const supabase = createClient()
     const { data } = await supabase

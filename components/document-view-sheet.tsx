@@ -17,9 +17,12 @@ import { useEffect, useState } from "react"
 import { Badge } from "./ui/badge"
 import { badgeStyle } from "@/lib/hooks/use-tags"
 import { SupabaseTag } from "@/lib/supabase"
+import { getDocumentByName } from "@/app/docs/actions"
+import { toast } from "sonner"
 
 export function DocumentViewer({ children, source, name, section, tags }: { children?: React.ReactNode, source: string, name: string, section?: PageSection, tags?: SupabaseTag[] }) {
     const [error, setError] = useState(false)
+    const [documentTags, setDocumentTags] = useState<SupabaseTag[] | null>(tags ?? null)
 
     useEffect(() => {
         const getDocument = async () => {
@@ -28,6 +31,19 @@ export function DocumentViewer({ children, source, name, section, tags }: { chil
             if (error) setError(true)
         }
         getDocument()
+    }, [])
+
+    useEffect(() => {
+        const getDocumentData = async () => {
+            if (tags) return
+            const { data, error } = await getDocumentByName(name)
+            if (error) {
+                toast.error("Error fetching document data");
+                return;
+            }
+            setDocumentTags(data.metadata.tags)
+        }
+        getDocumentData()
     }, [])
 
     return (
@@ -41,8 +57,8 @@ export function DocumentViewer({ children, source, name, section, tags }: { chil
                     {/* <SheetDescription>
                         View the document here.
                     </SheetDescription> */}
-                    {tags && tags.length > 0 && <div className="flex flex-wrap gap-2">
-                        {tags?.map((tag, idx) => (
+                    {documentTags && documentTags.length > 0 && <div className="flex flex-wrap gap-2">
+                        {documentTags?.map((tag, idx) => (
                             <Badge
                                 key={tag.id}
                                 variant="outline"

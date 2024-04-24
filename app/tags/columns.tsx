@@ -116,10 +116,6 @@ export const columns: ColumnDef<SupabaseTag>[] = [
     //         )
     //     },
     // },
-    // {
-    //     id: "viewer",
-    //     cell: ({ row }) => <DocumentViewer name={row.original.name!} source={row.original.source!} tags={row.original.metadata?.tags} />,
-    // },
     {
         id: "actions",
         cell: ({ row }) => <TagsRowActions row={row} />,
