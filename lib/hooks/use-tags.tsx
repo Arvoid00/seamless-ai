@@ -3,13 +3,7 @@
 import { getTags } from '@/app/tags/actions';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { SupabaseTag } from '../supabase';
-
-export const badgeStyle = (color: string) => ({
-    borderColor: `${color}20`,
-    backgroundColor: `${color}30`,
-    color,
-});
+import { SupabaseTag } from '../../types/supabase';
 
 export const TAG_COLORS = [
     "#ef4444",

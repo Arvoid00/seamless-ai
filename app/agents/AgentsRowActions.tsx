@@ -18,45 +18,35 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-import { labels } from "@/components/table/data"
-import { SupabaseDocument } from "@/types/supabase"
-import { deleteDocument, deleteFileObject } from "./actions"
+import { SupabaseAgent } from "@/types/supabase"
+import { deleteAgent } from "./actions"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
-import { PageSection } from "../vectorsearch/route"
+import AgentDialog from "@/components/agent-dialog"
 
 interface DataTableRowActionsProps<TData> {
     row: Row<TData>
 }
 
-type DocMetadata = {
-    fileName?: string
-} & JSON
-
-export function DocumentsRowActions<TData>({
+export function AgentsRowActions<TData extends SupabaseAgent>({
     row,
 }: DataTableRowActionsProps<TData>) {
-    const doc = row.original as SupabaseDocument
+    const agent = row.original
     const router = useRouter()
 
-    async function handleFileDelete(e: React.MouseEvent) {
+    async function handleAgentDelete(e: React.MouseEvent) {
         e.preventDefault()
-        const fileName = (doc.metadata as unknown as DocMetadata).fileName
-        console.log("Deleting file", fileName)
+        console.log("Deleting agent", agent.name)
         try {
-            if (!fileName) throw new Error("No file name found")
-            const { error } = await deleteFileObject(fileName)
+            const { error } = await deleteAgent(agent.id)
             if (error) throw error
-            const { data } = await deleteDocument(doc.id!)
-            console.log(data)
-            toast.success("File deleted!")
+            toast.success("Agent deleted!")
             router.refresh()
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error)
-            toast.error("Error deleting file", { description: errorMessage })
+            toast.error("Error deleting agent", { description: errorMessage })
         }
     }
-
 
     return (
         <DropdownMenu>
@@ -83,11 +73,16 @@ export function DocumentsRowActions<TData>({
                             ))}
                         </DropdownMenuRadioGroup>
                     </DropdownMenuSubContent>
-                </DropdownMenuSub> 
-                <DropdownMenuSeparator /> */}
-                <DropdownMenuItem onClick={(e) => handleFileDelete(e)} className="cursor-pointer hover:bg-destructive-foreground">
-                    Delete
+                </DropdownMenuSub> */}
+
+                <DropdownMenuItem asChild>
+                    <AgentDialog agent={row.original} title={"Edit Agent"} action={"edit"} />
                     {/* <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut> */}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleAgentDelete}>
+                    Delete
+                    <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>

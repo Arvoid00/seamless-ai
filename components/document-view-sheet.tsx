@@ -15,8 +15,8 @@ import {
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import { Badge } from "./ui/badge"
-import { badgeStyle } from "@/lib/hooks/use-tags"
-import { SupabaseTag } from "@/lib/supabase"
+import { badgeStyle } from "@/components/ui/badge"
+import { SupabaseTag } from "@/types/supabase"
 import { getDocumentByName } from "@/app/docs/actions"
 import { toast } from "sonner"
 

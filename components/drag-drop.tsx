@@ -20,7 +20,7 @@ import { spinner } from "./stocks";
 import { toast } from "sonner";
 import TagSelector from "./tag-selector";
 import { getBytes } from "@/lib/utils";
-import { SupabaseTag } from "@/lib/supabase";
+import { SupabaseTag } from "@/types/supabase";
 
 export type SelectedTagsProps = {
     [key: string]: SupabaseTag[]

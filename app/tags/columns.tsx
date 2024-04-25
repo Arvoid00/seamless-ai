@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { labels, priorities, statuses } from "@/components/table/data"
 import { DataTableColumnHeader } from "@/components/table/data-table-column-header"
 import { TagsRowActions } from "./TagsRowActions"
-import { SupabaseTag } from "@/lib/supabase"
+import { SupabaseTag } from "@/types/supabase"
 
 export const columns: ColumnDef<SupabaseTag>[] = [
     {

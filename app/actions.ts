@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
-import { type Chat } from '@/lib/types'
+import { type Chat } from '@/types/types'
 import { createClient } from '@/utils/supabase/server'
 
 export async function getChats(userId?: string | null) {

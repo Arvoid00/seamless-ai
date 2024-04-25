@@ -23,9 +23,15 @@ const badgeVariants = cva(
   }
 )
 
+export const badgeStyle = (color: string) => ({
+  borderColor: `${color}20`,
+  backgroundColor: `${color}30`,
+  color,
+});
+
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {}
+  VariantProps<typeof badgeVariants> { }
 
 function Badge({ className, variant, ...props }: BadgeProps) {
   return (

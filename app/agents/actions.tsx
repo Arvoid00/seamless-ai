@@ -2,58 +2,75 @@
 import "server-only"
 
 import { createClient } from "@/utils/supabase/server"
-import { SupabaseTag } from "@/types/supabase"
+import { SupabaseAgent } from "@/types/supabase"
 
-export async function getTags() {
+export async function getAgents() {
     const supabase = createClient()
     const { data, error } = await supabase
-        .from('tags')
+        .from('agents')
         .select()
+        .throwOnError()
     return { data, error }
 }
 
-export async function getTag(id: number) {
+export async function getAgentById(id: number) {
     const supabase = createClient()
     const { data, error } = await supabase
-        .from('tags')
+        .from('agents')
         .select()
         .eq('id', id)
+        .single()
+        .throwOnError()
     return { data, error }
 }
 
-export async function getTagsByGroup(group: string) {
+export async function getAgentByName(name: string) {
     const supabase = createClient()
     const { data, error } = await supabase
-        .from('tags')
+        .from('agents')
+        .select()
+        .eq('name', name)
+        .single()
+        .throwOnError()
+    return { data, error }
+}
+
+export async function getAgentsByGroup(group: string) {
+    const supabase = createClient()
+    const { data, error } = await supabase
+        .from('agents')
         .select()
         .eq('group', group)
+        .throwOnError()
     return { data, error }
 }
 
-export async function deleteTag(id: number) {
+export async function deleteAgent(id: number) {
     const supabase = createClient()
     const { data, error } = await supabase
-        .from('tags')
+        .from('agents')
         .delete()
         .eq('id', id)
         .throwOnError()
     return { data, error }
 }
 
-export async function createTag(tag: Partial<SupabaseTag>) {
+export async function createAgent(tag: Partial<SupabaseAgent>) {
     const supabase = createClient()
     const { data, error } = await supabase
-        .from('tags')
+        .from('agents')
         .insert(tag)
-        .select('*').single()
+        .select('*')
+        .single()
     return { data, error }
 }
 
-export async function upsertTag(tag: Partial<SupabaseTag>) {
+export async function upsertAgent(tag: Partial<SupabaseAgent>) {
     const supabase = createClient()
     const { data, error } = await supabase
-        .from('tags')
+        .from('agents')
         .upsert(tag)
-        .select('*').single()
+        .select('*')
+        .single()
     return { data, error }
 }

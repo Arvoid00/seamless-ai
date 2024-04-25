@@ -11,7 +11,8 @@ import { useAIState, useActions, useUIState } from 'ai/rsc'
 import type { AI } from '@/lib/chat/actions'
 import { nanoid } from 'nanoid'
 import { UserMessage } from './stocks/message'
-import { badgeStyle, useTags } from '@/lib/hooks/use-tags'
+import { useTags } from '@/lib/hooks/use-tags'
+import { badgeStyle } from './ui/badge'
 import { Badge } from './ui/badge'
 
 export interface ChatPanelProps {
@@ -129,20 +130,6 @@ export function ChatPanel({
             </div>
           </div>
         ) : null}
-
-        {selectedTags.length ? <div className='flex text-sm my-2'>
-          <span className='mr-2'>Tags to use in question:</span>
-          <div>{selectedTags.map(({ name, value, color }) => (
-            <Badge
-              key={value}
-              variant="outline"
-              style={badgeStyle(color)}
-              className="mr-1 mb-1"
-            >
-              {name}
-            </Badge>
-          ))}</div>
-        </div> : null}
 
         <div className="space-y-4 border-t bg-background px-4 py-2 shadow-lg sm:rounded-t-xl sm:border md:py-4">
           <PromptForm input={input} setInput={setInput} />

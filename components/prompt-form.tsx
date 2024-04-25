@@ -9,16 +9,14 @@ import { UserMessage } from './stocks/message'
 import { type AI } from '@/lib/chat/actions'
 import { Button } from '@/components/ui/button'
 import { IconArrowElbow, IconPlus } from '@/components/ui/icons'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger
-} from '@/components/ui/tooltip'
+
 import { useEnterSubmit } from '@/lib/hooks/use-enter-submit'
 import { nanoid } from 'nanoid'
 import { useRouter } from 'next/navigation'
-import { CommandMenu } from './command-menu'
+
 import { useTags } from '@/lib/hooks/use-tags'
+import { Tooltip, TooltipContent } from './ui/tooltip'
+import { TooltipTrigger } from '@radix-ui/react-tooltip'
 
 export function PromptForm({
   input,
@@ -71,23 +69,11 @@ export function PromptForm({
       }}
     >
       <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-8 sm:rounded-md sm:border sm:px-12">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <CommandMenu />
-            {/* <Button
-              variant="outline"
-              size="icon"
-              className="absolute left-0 top-[14px] size-8 rounded-full bg-background p-0 sm:left-4"
-              onClick={() => {
-                router.push('/new')
-              }}
-            >
-              <IconPlus />
-              <span className="sr-only">Settings</span>
-            </Button> */}
-          </TooltipTrigger>
-          <TooltipContent>Settings</TooltipContent>
-        </Tooltip>
+        <div className='absolute left-0 top-[14px] h-8 w-12 bg-background p-0 sm:left-4'>
+          <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+            <span className="text-xs">⌘</span><span className='capitalize'>{'k'}</span>
+          </kbd>
+        </div>
         <Textarea
           ref={inputRef}
           tabIndex={0}

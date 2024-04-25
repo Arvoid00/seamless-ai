@@ -4,7 +4,12 @@ module.exports = {
     return [
       {
         source: '/new',
-        destination: '/',
+        destination: '/default',
+        permanent: true,
+      },
+      {
+        source: '/',
+        destination: '/default',
         permanent: true,
       },
     ]

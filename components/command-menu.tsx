@@ -1,3 +1,5 @@
+"use client"
+
 import {
     CalendarIcon,
     EnvelopeClosedIcon,
@@ -26,6 +28,7 @@ import { ChevronRight, MoonIcon, SunIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCommandState } from 'cmdk'
 import { useTheme } from 'next-themes'
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 
 const TRIGGER_KEY = 'k'
 
@@ -66,22 +69,26 @@ export function CommandMenu() {
     }
 
     return (
-        <>
-            <Button
-                variant="ghost"
-                size="icon"
-                aria-haspopup="dialog"
-                aria-label="Open command menu"
-                aria-controls="command-menu"
-                role="combobox"
-                aria-expanded={open}
-                className="absolute left-0 top-[14px] h-8 w-12 bg-background p-0 sm:left-4"
-                onClick={() => setOpen(open => !open)}
-            >
-                <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-                    <span className="text-xs">⌘</span><span className='capitalize'>{TRIGGER_KEY}</span>
-                </kbd>
-            </Button>
+        <><Tooltip>
+            <TooltipTrigger asChild>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-haspopup="dialog"
+                    aria-label="Open command menu"
+                    aria-controls="command-menu"
+                    role="combobox"
+                    aria-expanded={open}
+                    className="absolute left-0 top-[14px] h-8 w-12 bg-background p-0 sm:left-4"
+                    onClick={() => setOpen(open => !open)}
+                >
+                    <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                        <span className="text-xs">⌘</span><span className='capitalize'>{TRIGGER_KEY}</span>
+                    </kbd>
+                </Button>
+            </TooltipTrigger>
+            <TooltipContent>Settings</TooltipContent>
+        </Tooltip>
             <CommandDialog open={open} onOpenChange={setOpen}>
                 <CommandInput placeholder="Type a command or search..." ref={commandInputRef} />
                 <CommandList>

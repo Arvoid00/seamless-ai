@@ -33,11 +33,11 @@ import {
 } from '@/lib/utils'
 import { saveChat } from '@/app/actions'
 import { SpinnerMessage, UserMessage, VectorMessage } from '@/components/stocks/message'
-import { Chat } from '@/lib/types'
+import { Chat } from '@/types/types'
 import { getUser } from '@/app/(auth)/actions'
 import { confirmPurchase, vectorSearch } from './ui-functions'
 import { VectorResponse } from '@/app/vectorsearch/route'
-import { SupabaseTag } from '../supabase'
+import { SupabaseTag } from '../../types/supabase'
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || ''
 const openai = new OpenAI({

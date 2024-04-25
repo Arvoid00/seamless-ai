@@ -31,8 +31,8 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { DocumentViewer } from '../document-view-sheet'
 import { MarkdownWrapper } from '../markdown'
-import { SupabaseTag } from '@/lib/supabase'
-import { badgeStyle } from '@/lib/hooks/use-tags'
+import { SupabaseTag } from '@/types/supabase'
+import { badgeStyle } from '../ui/badge'
 
 // Different types of message bubbles.
 

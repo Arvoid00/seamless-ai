@@ -10,7 +10,7 @@ import { DataTableColumnHeader } from "@/components/table/data-table-column-head
 import { formatDate } from "@/lib/utils"
 import { DocumentsRowActions } from "./DocumentsRowActions"
 import { DocumentViewer } from "@/components/document-view-sheet"
-import { Json, SupabaseDocument } from "@/lib/supabase"
+import { Json, SupabaseDocument } from "@/types/supabase"
 
 export const columns: ColumnDef<SupabaseDocument>[] = [
     {

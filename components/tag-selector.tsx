@@ -4,11 +4,13 @@ import React, { Dispatch, SetStateAction } from 'react';
 import MultipleSelector from '@/components/ui/multiple-selector';
 import { SelectedTagsProps } from './drag-drop';
 import { useTags } from '@/lib/hooks/use-tags';
-import { SupabaseTag } from '@/lib/supabase';
+import { SupabaseTag } from '@/types/supabase';
 
 const TagSelector = ({ selectedTags, setSelectedTags, forFile }: { selectedTags: SelectedTagsProps, setSelectedTags: Dispatch<SetStateAction<SelectedTagsProps>>, forFile: string }) => {
     const [isTriggered, setIsTriggered] = React.useState(false);
     const { tags } = useTags();
+
+    const validatedForFile = forFile ?? 'agent';
 
     const mockSearch = async (value: string): Promise<SupabaseTag[]> => {
         return new Promise((resolve) => {
@@ -30,7 +32,7 @@ const TagSelector = ({ selectedTags, setSelectedTags, forFile }: { selectedTags:
                 }}
                 selected={selectedTags}
                 setSelected={setSelectedTags}
-                forFile={forFile}
+                forFile={validatedForFile}
                 defaultOptions={[]}
                 creatable
                 groupBy="group"

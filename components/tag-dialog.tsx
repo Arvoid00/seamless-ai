@@ -21,7 +21,7 @@ import { useRouter } from "next/navigation";
 import { Pencil2Icon } from "@radix-ui/react-icons";
 import { createTag, upsertTag } from "@/app/tags/actions";
 import { DropdownMenuItem } from "./ui/dropdown-menu";
-import { SupabaseTag } from "@/lib/supabase";
+import { SupabaseTag } from "@/types/supabase";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { TAG_COLORS, useTags } from "@/lib/hooks/use-tags";
 
@@ -87,6 +87,8 @@ const TagDialog = ({ title, action, open, tag }: TagDialogProps) => {
             const { data, error } = await upsertTag(values);
 
             setTags((tags) => [...tags, data]);
+            setIsOpen(false);
+            router.refresh();
         }
     };
 

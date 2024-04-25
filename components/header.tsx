@@ -14,6 +14,12 @@ import { SidebarMobile } from './sidebar-mobile'
 import { SidebarToggle } from './sidebar-toggle'
 import { ChatHistory } from './chat-history'
 import { getUser } from '@/app/(auth)/actions'
+import { CommandMenu } from './command-menu'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger
+} from '@/components/ui/tooltip'
 
 async function UserOrLogin() {
   // const session = (await auth()) as Session
@@ -55,18 +61,26 @@ export function Header() {
           <UserOrLogin />
         </React.Suspense>
       </div>
-      <Button variant="link" asChild>
-        <Link href="/">Home</Link>
-      </Button>
-      <div className='flex'>
+      <div>
+        <Button variant="link" asChild>
+          <Link href="/">Home</Link>
+        </Button>
+        <CommandMenu />
+      </div>
+      <div className='flex items-center'>
         <Button variant="link" asChild>
           <Link href="/docs">Doc Manager</Link>
         </Button>
         <Button variant="link" asChild>
           <Link href="/tags">Tag Manager</Link>
         </Button>
+        <Button variant="link" asChild>
+          <Link href="/agents">Agent Manager</Link>
+        </Button>
+        <Button variant="link" asChild>
+          <Link href="/agents">Agent Manager</Link>
+        </Button>
       </div>
-
       {/* <div className="flex items-center justify-end space-x-2">
         <a
           target="_blank"

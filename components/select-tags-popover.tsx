@@ -19,15 +19,16 @@ import {
 import { cn } from "@/lib/utils"
 import { Badge } from "./ui/badge"
 import { Check } from "lucide-react"
-import { badgeStyle, useTags } from "@/lib/hooks/use-tags"
-import { SupabaseTag } from "@/lib/supabase"
+import { useTags } from "@/lib/hooks/use-tags"
+import { badgeStyle } from "./ui/badge"
+import { SupabaseTag } from "@/types/supabase"
 
 type SelectTagsPopoverProps = {
-    children: React.ReactNode
+    children?: React.ReactNode
     className?: string
     open: boolean
     setOpen: (value: boolean) => void
-    returnFocusRef: React.RefObject<HTMLElement>
+    returnFocusRef?: React.RefObject<HTMLElement>
 }
 
 export function SelectTagsPopover({ children, className, open, setOpen, returnFocusRef }: SelectTagsPopoverProps) {
@@ -47,11 +48,11 @@ export function SelectTagsPopover({ children, className, open, setOpen, returnFo
         <Popover open={open} onOpenChange={(newOpen) => {
             setOpen(newOpen)
             if (!newOpen) {
-                returnFocusRef.current?.focus()
+                returnFocusRef?.current?.focus()
             }
         }}>
             <PopoverTrigger asChild>
-                {children}
+                {children ? children : <Button>⚙️</Button>}
             </PopoverTrigger>
             <PopoverContent className="p-0" side="right" align="start">
                 <Command>

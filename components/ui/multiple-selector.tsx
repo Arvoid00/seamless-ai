@@ -9,8 +9,9 @@ import { useEffect, forwardRef } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { capitalizeFirstLetter, cn } from '@/lib/utils';
 import { SelectedTagsProps } from '../drag-drop';
-import { SupabaseTag } from '@/lib/supabase';
-import { badgeStyle, pickRandomColor } from '@/lib/hooks/use-tags';
+import { SupabaseTag } from '@/types/supabase';
+import { pickRandomColor } from '@/lib/hooks/use-tags';
+import { badgeStyle } from '@/components/ui/badge';
 import { createTag } from '@/app/tags/actions';
 import { toast } from 'sonner';
 
@@ -445,7 +446,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                             ) : (
                                 <>
                                     {EmptyItem()}
-                                    {CreatableItem()}
+
                                     {!selectFirstItem && <CommandItem value="-" className="hidden" />}
                                     {Object.entries(selectables).map(([key, dropdowns]) => (
                                         <CommandGroup key={key} heading={key} className="h-full overflow-auto">
@@ -489,6 +490,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                                             </>
                                         </CommandGroup>
                                     ))}
+                                    {CreatableItem()}
                                 </>
                             )}
                         </CommandList>

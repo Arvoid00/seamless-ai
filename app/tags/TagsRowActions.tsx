@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 import { labels } from "@/components/table/data"
-import { SupabaseTag } from "@/lib/supabase"
+import { SupabaseTag } from "@/types/supabase"
 import { deleteTag } from "./actions"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"

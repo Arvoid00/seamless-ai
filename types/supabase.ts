@@ -7,6 +7,7 @@ export type DocumentSection =
   Database['public']['Tables']['document_sections']['Row']
 export type SupabaseDocument = Database['public']['Tables']['documents']['Row']
 export type SupabaseTag = Database['public']['Tables']['tags']['Row']
+export type SupabaseAgent = Database['public']['Tables']['agents']['Row']
 
 export type Json =
   | string
@@ -19,6 +20,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      agents: {
+        Row: {
+          tags: Json | null
+          created_at: string
+          description: string | null
+          functions: string[] | null
+          id: number
+          model: string | null
+          name: string
+          prompt: string | null
+          temperature: number | null
+        }
+        Insert: {
+          tags?: Json | null
+          created_at?: string
+          description?: string | null
+          functions?: string[] | null
+          id?: number
+          model?: string | null
+          name: string
+          prompt?: string | null
+          temperature?: number | null
+        }
+        Update: {
+          tags?: Json | null
+          created_at?: string
+          description?: string | null
+          functions?: string[] | null
+          id?: number
+          model?: string | null
+          name?: string
+          prompt?: string | null
+          temperature?: number | null
+        }
+        Relationships: []
+      }
       chats: {
         Row: {
           created_at: string
@@ -27,13 +64,13 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
-          created_at?: never
+          created_at?: string
           id: string
           payload?: Json | null
           user_id?: string | null
         }
         Update: {
-          created_at?: never
+          created_at?: string
           id?: string
           payload?: Json | null
           user_id?: string | null
@@ -122,14 +159,14 @@ export type Database = {
           source: string | null
         }
         Insert: {
-          created_at?: never
+          created_at?: string
           id?: never
           metadata?: Json | null
           name: string
           source?: string | null
         }
         Update: {
-          created_at?: never
+          created_at?: string
           id?: never
           metadata?: Json | null
           name?: string
@@ -139,28 +176,28 @@ export type Database = {
       }
       tags: {
         Row: {
+          color: string
           created_at: string
           group: string | null
           id: number
           name: string
           value: string
-          color: string
         }
         Insert: {
-          created_at?: never
+          color: string
+          created_at?: string
           group?: string | null
-          id?: never
+          id?: number
           name: string
           value: string
-          color?: string
         }
         Update: {
-          created_at?: never
+          color?: string
+          created_at?: string
           group?: string | null
-          id?: never
+          id?: number
           name?: string
           value?: string
-          color?: string
         }
         Relationships: []
       }
@@ -201,6 +238,7 @@ export type Database = {
           match_threshold?: number
           match_count?: number
           filter?: Json
+          tags?: string[]
         }
         Returns: {
           id: number

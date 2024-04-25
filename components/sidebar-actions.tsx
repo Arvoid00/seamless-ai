@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import * as React from 'react'
 import { toast } from 'sonner'
 
-import { ServerActionResult, type Chat } from '@/lib/types'
+import { ServerActionResult, type Chat } from '@/types/types'
 import {
   AlertDialog,
   AlertDialogAction,

@@ -10,7 +10,7 @@ import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter'
 import { uploadFileToSupabase } from '@/app/docs/actions'
 import { SelectedTagsProps } from '@/components/drag-drop'
 import { fetchWithRetry, retryOperation } from '@/lib/utils'
-import { SupabaseTag } from '@/lib/supabase'
+import { SupabaseTag } from '@/types/supabase'
 
 // TODO: Rollback sequence if any of the steps fail
 
