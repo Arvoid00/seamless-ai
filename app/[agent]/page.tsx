@@ -34,7 +34,7 @@ export default async function AgentPage({ params }: AgentPageProps) {
     }
 
     const { data: agent, error } = await getAgentByName(params.agent)
-    if (!agent || error) redirect('/')
+    if (!agent || error) redirect('/default')
     console.log(agent.name, params.agent)
 
     return (
