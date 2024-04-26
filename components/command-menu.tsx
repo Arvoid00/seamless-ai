@@ -29,6 +29,7 @@ import { toast } from 'sonner'
 import { useCommandState } from 'cmdk'
 import { useTheme } from 'next-themes'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
+import { SelectAgentPopover } from './select-agent-popover'
 
 const TRIGGER_KEY = 'k'
 
@@ -46,6 +47,7 @@ function PopoverCommandItemContent({ title, icon }: { title: string, icon: React
 export function CommandMenu() {
     const [open, setOpen] = useState(false)
     const [openCategoriesPopover, setOpenCategoriesPopover] = useState(false)
+    const [openAgentPopover, setOpenAgentPopover] = useState(false)
     const commandInputRef = useRef(null);
     const [pages, setPages] = useState<string[]>([])
     const page = pages[pages.length - 1]
@@ -99,10 +101,12 @@ export function CommandMenu() {
                                 <PopoverCommandItemContent title='Select categories' icon={<TargetIcon className="size-5 mr-2" />} />
                             </CommandItem>
                         </SelectTagsPopover>
-                        <CommandItem onSelect={() => toast.message("Redirecting to Agents")}>
-                            <RocketIcon className="size-5 mr-2" />
-                            Go to Agent
-                        </CommandItem>
+                        <SelectAgentPopover open={openAgentPopover} setOpen={setOpenAgentPopover} returnFocusRef={commandInputRef}>
+                            <CommandItem onSelect={() => setOpenAgentPopover(true)}>
+                                <RocketIcon className="size-5 mr-2" />
+                                Select Agent
+                            </CommandItem>
+                        </SelectAgentPopover>
                     </CommandGroup>
                     <CommandSeparator />
                     <CommandGroup heading="User">

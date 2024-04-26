@@ -6,6 +6,7 @@ import { SelectTagsPopover } from './select-tags-popover'
 import { useState } from 'react'
 import { Button } from './ui/button'
 import { useTags } from '@/lib/hooks/use-tags'
+import { SelectAgentPopover } from './select-agent-popover'
 
 
 function CurrentAgent({ agent }: { agent: SupabaseAgent }) {
@@ -29,9 +30,9 @@ function CurrentAgent({ agent }: { agent: SupabaseAgent }) {
                         </Badge>
                     ))}
                 </div>
-                <SelectTagsPopover open={open} setOpen={setOpen}>
+                <SelectAgentPopover open={open} setOpen={setOpen}>
                     <Button variant={"secondary"}>⚙️</Button>
-                </SelectTagsPopover>
+                </SelectAgentPopover>
             </div>
             {selectedTags.length ? <div className='flex text-sm my-2'>
                 <span className='mr-2'>Custom tags:</span>
