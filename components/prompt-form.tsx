@@ -17,6 +17,7 @@ import { useRouter } from 'next/navigation'
 import { useTags } from '@/lib/hooks/use-tags'
 import { Tooltip, TooltipContent } from './ui/tooltip'
 import { TooltipTrigger } from '@radix-ui/react-tooltip'
+import { useAgent } from '@/lib/hooks/use-current-agent'
 
 export function PromptForm({
   input,
@@ -31,6 +32,7 @@ export function PromptForm({
   const { submitUserMessage } = useActions()
   const [_, setMessages] = useUIState<typeof AI>()
   const { selectedTags } = useTags()
+  const { agent } = useAgent()
 
   React.useEffect(() => {
     if (inputRef.current) {
@@ -63,13 +65,13 @@ export function PromptForm({
         ])
 
         // Submit and get response message
-        const body = { content: value, tags: selectedTags }
+        const body = { content: value, tags: [...selectedTags, ...agent?.tags], agent: agent }
         const responseMessage = await submitUserMessage(body)
         setMessages(currentMessages => [...currentMessages, responseMessage])
       }}
     >
       <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-8 sm:rounded-md sm:border sm:px-12">
-        <div className='absolute left-0 top-[14px] h-8 w-12 bg-background p-0 sm:left-4'>
+        <div className='absolute left-0 top-[18px] h-8 w-12 bg-background p-0 sm:left-4'>
           <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
             <span className="text-xs">⌘</span><span className='capitalize'>{'k'}</span>
           </kbd>

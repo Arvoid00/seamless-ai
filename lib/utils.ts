@@ -104,7 +104,7 @@ export async function fetchWithRetry(
   url: string,
   options = {},
   retries = 3,
-  backoff = 300
+  backoff = 500
 ) {
   try {
     const response = await fetch(url, options)

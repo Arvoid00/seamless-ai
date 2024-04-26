@@ -37,7 +37,7 @@ import { Chat } from '@/types/types'
 import { getUser } from '@/app/(auth)/actions'
 import { confirmPurchase, vectorSearch } from './ui-functions'
 import { VectorResponse } from '@/app/vectorsearch/route'
-import { SupabaseTag } from '../../types/supabase'
+import { SupabaseAgent, SupabaseTag } from '../../types/supabase'
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || ''
 const openai = new OpenAI({
@@ -74,13 +74,14 @@ async function getVectorResult(query: string, tags: SupabaseTag[]) {
   return vectorResponse
 }
 
-async function submitUserMessage({ content, tags }: { content: string, tags: SupabaseTag[] }) {
+async function submitUserMessage({ content, tags, agent }: { content: string, tags: SupabaseTag[], agent: SupabaseAgent }) {
   'use server'
 
   const aiState = getMutableAIState<typeof AI>()
 
   console.log('User message:', content)
   console.log('Tags:', tags)
+  console.log('Agent:', agent)
 
   aiState.update({
     ...aiState.get(),
@@ -184,7 +185,7 @@ Besides that, you can also chat with users and do some calculations if needed.`
 
           return (
             <BotCard>
-              <VectorMessage data={data} usage={usage} sections={sections} tags={tags} />
+              <VectorMessage data={data} usage={usage} sections={sections} tags={tags} agent={agent} />
               {/* <BotMessage content={`Result: ${data.message.content}`} /> */}
             </BotCard>
           )
@@ -397,6 +398,7 @@ export type Message = {
 export type AIState = {
   chatId: string
   messages: Message[]
+  agent?: SupabaseAgent
 }
 
 export type UIState = {
@@ -431,12 +433,12 @@ export const AI = createAI<AIState, UIState>({
     const user = await getUser()
     if (!user) return
 
-    const { chatId, messages } = state
+    const { chatId, messages, agent } = state
 
     const createdAt = new Date()
     const userId = user.id
-    const path = `/chat/${chatId}`
-    const title = messages[0].content.substring(0, 100)
+    const path = `${agent?.name ?? 'default'}/chat/${chatId}`
+    const title = messages[0].content?.substring(0, 100) || 'Untitled'
 
     const chat: Chat = {
       id: chatId,
@@ -475,7 +477,7 @@ export const getUIStateFromAIState = (aiState: Chat) => {
               <Events props={JSON.parse(message.content)} />
             </BotCard>
           ) : message.name === 'vecSearch' ? (
-            <VectorMessage data={JSON.parse(message.content).data} usage={JSON.parse(message.content).usage} sections={JSON.parse(message.content).sections} tags={JSON.parse(message.content).tags} />
+            <VectorMessage data={JSON.parse(message.content).data} usage={JSON.parse(message.content).usage} sections={JSON.parse(message.content).sections} tags={JSON.parse(message.content).tags} agent={JSON.parse(message.content).agent} />
           ) : null
         ) : message.role === 'user' ? (
           <UserMessage>{message.content}</UserMessage>

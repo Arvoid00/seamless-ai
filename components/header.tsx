@@ -77,9 +77,6 @@ export function Header() {
         <Button variant="link" asChild>
           <Link href="/agents">Agent Manager</Link>
         </Button>
-        <Button variant="link" asChild>
-          <Link href="/agents">Agent Manager</Link>
-        </Button>
       </div>
       {/* <div className="flex items-center justify-end space-x-2">
         <a

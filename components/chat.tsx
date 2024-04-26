@@ -12,6 +12,7 @@ import { Message } from '@/lib/chat/actions'
 import { useScrollAnchor } from '@/lib/hooks/use-scroll-anchor'
 import { toast } from 'sonner'
 import { User } from '@supabase/supabase-js'
+import { useAgent } from '@/lib/hooks/use-current-agent'
 
 export interface ChatProps extends React.ComponentProps<'div'> {
   initialMessages?: Message[]
@@ -27,13 +28,14 @@ export function Chat({ id, title, className, user, missingKeys }: ChatProps) {
   const [input, setInput] = useState('')
   const [messages] = useUIState()
   const [aiState] = useAIState()
+  const { agent } = useAgent()
 
   const [_, setNewChatId] = useLocalStorage('newChatId', id)
 
   useEffect(() => {
     if (user) {
       if (!path.includes('chat') && messages.length === 1) {
-        window.history.replaceState({}, '', `/chat/${id}`)
+        window.history.replaceState({}, '', `${agent?.name ?? 'default'}/chat/${id}`)
       }
     }
   }, [id, path, user, messages])

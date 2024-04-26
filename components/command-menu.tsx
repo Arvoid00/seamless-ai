@@ -79,7 +79,7 @@ export function CommandMenu() {
                     aria-controls="command-menu"
                     role="combobox"
                     aria-expanded={open}
-                    className="absolute left-0 top-[14px] h-8 w-12 bg-background p-0 sm:left-4"
+                    className="h-8 w-12 bg-background p-0 sm:left-4"
                     onClick={() => setOpen(open => !open)}
                 >
                     <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">

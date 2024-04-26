@@ -31,7 +31,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { DocumentViewer } from '../document-view-sheet'
 import { MarkdownWrapper } from '../markdown'
-import { SupabaseTag } from '@/types/supabase'
+import { SupabaseAgent, SupabaseTag } from '@/types/supabase'
 import { badgeStyle } from '../ui/badge'
 
 // Different types of message bubbles.
@@ -52,6 +52,7 @@ export function UserMessage({ children }: { children: React.ReactNode }) {
 export function VectorMessage({
   data,
   usage,
+  agent,
   sections,
   tags,
   className
@@ -59,6 +60,7 @@ export function VectorMessage({
   // content: string | StreamableValue<string>
   data: any
   usage?: { prompt_tokens: number, completion_tokens: number, total_tokens: number }
+  agent?: SupabaseAgent
   tags?: SupabaseTag[]
   sections: PageSection[]
   className?: string
@@ -112,8 +114,22 @@ export function VectorMessage({
                   </div>
                 )}
 
+                {agent && agent?.tags?.length ? <div className='flex text-sm my-2'>
+                  <span className='mr-5'>Used Agent: 🤖 {agent.name}</span>
+                  <div>{agent.tags.map(({ name, value, color }) => (
+                    <Badge
+                      key={value}
+                      variant="outline"
+                      style={badgeStyle(color)}
+                      className="mr-1 mb-1"
+                    >
+                      {name}
+                    </Badge>
+                  ))}</div>
+                </div> : null}
+
                 {tags && tags.length ? <div className='flex text-sm my-2'>
-                  <span className='mr-5'>Tags used to retrieve content: </span>
+                  <span className='mr-5'>Used Tags: </span>
                   <div>{tags.map(({ name, value, color }) => (
                     <Badge
                       key={value}
@@ -125,6 +141,7 @@ export function VectorMessage({
                     </Badge>
                   ))}</div>
                 </div> : null}
+
               </AccordionContent>
 
               {/* <SheetContent className='w-[500px]'>

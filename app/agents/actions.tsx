@@ -30,7 +30,7 @@ export async function getAgentByName(name: string) {
         .from('agents')
         .select()
         .eq('name', name)
-        .single()
+        .maybeSingle()
         .throwOnError()
     return { data, error }
 }

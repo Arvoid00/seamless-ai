@@ -11,9 +11,11 @@ import { useAIState, useActions, useUIState } from 'ai/rsc'
 import type { AI } from '@/lib/chat/actions'
 import { nanoid } from 'nanoid'
 import { UserMessage } from './stocks/message'
-import { useTags } from '@/lib/hooks/use-tags'
 import { badgeStyle } from './ui/badge'
 import { Badge } from './ui/badge'
+import { useAgent } from '@/lib/hooks/use-current-agent'
+import { useTags } from '@/lib/hooks/use-tags'
+import CurrentAgent from './current-agent'
 
 export interface ChatPanelProps {
   id?: string
@@ -36,6 +38,7 @@ export function ChatPanel({
   const [messages, setMessages] = useUIState<typeof AI>()
   const { submitUserMessage } = useActions()
   const [shareDialogOpen, setShareDialogOpen] = React.useState(false)
+  const { agent } = useAgent()
   const { selectedTags } = useTags()
 
   const exampleMessages = [
@@ -85,9 +88,8 @@ export function ChatPanel({
                     }
                   ])
 
-                  const responseMessage = await submitUserMessage(
-                    example.message
-                  )
+                  const body = { content: example.message, tags: [...selectedTags, ...agent?.tags], agent: agent }
+                  const responseMessage = await submitUserMessage(body)
 
                   setMessages(currentMessages => [
                     ...currentMessages,
@@ -124,12 +126,14 @@ export function ChatPanel({
                   messages: aiState.messages,
                   createdAt: aiState.createdAt,
                   userId: aiState.userId,
-                  path: `/chat/${id}`
+                  path: `${agent?.name ?? 'default'}/chat/${id}`
                 }}
               />
             </div>
           </div>
         ) : null}
+
+        {agent && <CurrentAgent agent={agent} />}
 
         <div className="space-y-4 border-t bg-background px-4 py-2 shadow-lg sm:rounded-t-xl sm:border md:py-4">
           <PromptForm input={input} setInput={setInput} />

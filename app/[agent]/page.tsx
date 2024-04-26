@@ -6,9 +6,6 @@ import { getMissingKeys } from "../actions"
 import { AI } from "@/lib/chat/actions"
 import { Chat } from "@/components/chat"
 import { getAgentByName } from "../agents/actions"
-import { Badge, badgeStyle } from "@/components/ui/badge"
-import CurrentAgent from "@/components/current-agent"
-
 
 export interface AgentPageProps {
     params: {
@@ -37,17 +34,12 @@ export default async function AgentPage({ params }: AgentPageProps) {
     }
 
     const { data: agent, error } = await getAgentByName(params.agent)
-
-    if (!agent) {
-        return <div>Failed to retrieve an agent</div>
-    }
+    if (!agent || error) redirect('/')
+    console.log(agent.name, params.agent)
 
     return (
-        <>
-            <CurrentAgent agent={agent} />
-            <AI initialAIState={{ chatId: id, messages: [] }}>
-                <Chat id={id} user={user} missingKeys={missingKeys} />
-            </AI>
-        </>
+        <AI initialAIState={{ chatId: id, messages: [], agent: agent }}>
+            <Chat id={id} user={user} missingKeys={missingKeys} />
+        </AI>
     )
 }
