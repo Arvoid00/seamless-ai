@@ -170,7 +170,7 @@ const AgentDialog = ({ title, action, open, agent }: AgentDialogProps) => {
                                             <FormLabel>Name</FormLabel>
                                             <Input
                                                 {...register(
-                                                    "name"
+                                                    "name", { setValueAs: (value) => value.trim().toLowerCase() }
                                                 )}
                                                 placeholder={
                                                     "Enter the name of the tag."

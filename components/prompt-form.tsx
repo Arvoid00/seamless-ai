@@ -65,7 +65,7 @@ export function PromptForm({
         ])
 
         // Submit and get response message
-        const body = { content: value, tags: [...selectedTags, ...agent?.tags], agent: agent }
+        const body = { content: value, tags: [...selectedTags, ...(agent ? agent?.tags : [])], agent: agent }
         const responseMessage = await submitUserMessage(body)
         setMessages(currentMessages => [...currentMessages, responseMessage])
       }}

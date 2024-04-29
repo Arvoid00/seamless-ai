@@ -5,9 +5,12 @@ import { Chat } from '@/components/chat'
 import { AI } from '@/lib/chat/actions'
 
 import { getUser } from '@/app/(auth)/actions'
+import { nanoid } from 'nanoid'
+import { getAgentByName } from '@/app/agents/actions'
 
 export interface ChatPageProps {
   params: {
+    agent: string
     id: string
   }
 }
@@ -24,23 +27,32 @@ export async function generateMetadata({
 export default async function ChatPage({ params }: ChatPageProps) {
   const user = await getUser()
   const missingKeys = await getMissingKeys()
+  console.log('ChatPage', params)
 
-  if (!user) {
-    redirect(`/login?next=/default/chat/${params.id}`)
+  const chatId = params.id
+  const agentName = params.agent
+
+  if (!user && chatId) {
+    redirect(`/login?next=/chat/${chatId}`)
+  } else if (!user) {
+    redirect('/login')
   }
 
-  const chat = await getChat(params.id)
+  const { data: agent, error } = await getAgentByName(agentName)
+  if (!agent || error) redirect('/')
+
+  const chat = await getChat(chatId)
 
   if (!chat) {
-    redirect('/default')
+    redirect('/' + agentName)
   }
 
-  if (chat?.userId !== user?.id) {
+  if (chat.userId !== user.id) {
     notFound()
   }
 
   return (
-    <AI initialAIState={{ chatId: chat.id, messages: chat.messages }}>
+    <AI initialAIState={{ chatId: chat.id, messages: chat.messages, agent: agent }}>
       <Chat
         id={chat.id}
         title={chat.title}

@@ -16,6 +16,7 @@ import { Badge } from './ui/badge'
 import { useAgent } from '@/lib/hooks/use-current-agent'
 import { useTags } from '@/lib/hooks/use-tags'
 import CurrentAgent from './current-agent'
+import CurrentTags from './current-tags'
 
 export interface ChatPanelProps {
   id?: string
@@ -126,14 +127,14 @@ export function ChatPanel({
                   messages: aiState.messages,
                   createdAt: aiState.createdAt,
                   userId: aiState.userId,
-                  path: `${agent?.name ?? 'default'}/chat/${id}`
+                  path: `${agent?.name ? agent.name + "/" : ''}chat/${id}`
                 }}
               />
             </div>
           </div>
         ) : null}
 
-        {agent && <CurrentAgent agent={agent} />}
+        {agent ? <CurrentAgent /> : <CurrentTags />}
 
         <div className="space-y-4 border-t bg-background px-4 py-2 shadow-lg sm:rounded-t-xl sm:border md:py-4">
           <PromptForm input={input} setInput={setInput} />

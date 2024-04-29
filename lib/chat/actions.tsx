@@ -437,7 +437,7 @@ export const AI = createAI<AIState, UIState>({
 
     const createdAt = new Date()
     const userId = user.id
-    const path = `${agent?.name ?? 'default'}/chat/${chatId}`
+    const path = `${agent?.name ? agent.name + "/" : ''}chat/${chatId}`
     const title = messages[0].content?.substring(0, 100) || 'Untitled'
 
     const chat: Chat = {

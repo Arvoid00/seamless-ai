@@ -9,7 +9,8 @@ import {
     GearIcon,
     PersonIcon,
     RocketIcon,
-    TargetIcon
+    TargetIcon,
+    PlusCircledIcon
 } from '@radix-ui/react-icons'
 
 import {
@@ -32,7 +33,7 @@ import { useCommandState } from 'cmdk'
 import { useTheme } from 'next-themes'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 import { SelectAgentPopover } from './select-agent-popover'
-import { redirect } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 
 const TRIGGER_KEY = 'k'
 
@@ -55,6 +56,7 @@ export function CommandMenu() {
     const [pages, setPages] = useState<string[]>([])
     const page = pages[pages.length - 1]
     const { setTheme, theme } = useTheme()
+    const router = useRouter()
 
     useEffect(() => {
         const down = (e: KeyboardEvent) => {
@@ -110,20 +112,24 @@ export function CommandMenu() {
                                 Select Agent
                             </CommandItem>
                         </SelectAgentPopover>
+                        <CommandItem onSelect={() => { setOpen(false); router.push('/') }}>
+                            <PlusCircledIcon className="size-5 mr-2" />
+                            New Chat
+                        </CommandItem>
                     </CommandGroup>
                     <CommandSeparator />
                     <CommandGroup heading="Manage">
-                        <CommandItem onSelect={() => redirect('docs')}>
+                        <CommandItem onSelect={() => { setOpen(false); router.push('docs') }}>
                             <FileIcon className="size-5 mr-2" />
-                            Documents
+                            Manage Documents
                         </CommandItem>
-                        <CommandItem onSelect={() => redirect('tags')}>
+                        <CommandItem onSelect={() => { setOpen(false); router.push('tags') }}>
                             <BookmarkIcon className="size-5 mr-2" />
-                            Tags
+                            Manage Tags
                         </CommandItem>
-                        <CommandItem onSelect={() => redirect('agents')}>
+                        <CommandItem onSelect={() => { setOpen(false); router.push('agents') }}>
                             <RocketIcon className="size-5 mr-2" />
-                            Agents
+                            Manage Agents
                         </CommandItem>
                     </CommandGroup>
                     <CommandSeparator />
