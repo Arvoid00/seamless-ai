@@ -30,7 +30,7 @@ export function AgentProvider({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         const getSelectedAgent = async () => {
-            if (!agentName) {
+            if (!agentName || agentName === "chat") {
                 setAgent(null)
                 return
             }
