@@ -4,6 +4,8 @@ import {
     CalendarIcon,
     EnvelopeClosedIcon,
     FaceIcon,
+    BookmarkIcon,
+    FileIcon,
     GearIcon,
     PersonIcon,
     RocketIcon,
@@ -30,6 +32,7 @@ import { useCommandState } from 'cmdk'
 import { useTheme } from 'next-themes'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 import { SelectAgentPopover } from './select-agent-popover'
+import { redirect } from 'next/navigation'
 
 const TRIGGER_KEY = 'k'
 
@@ -98,7 +101,7 @@ export function CommandMenu() {
                     <CommandGroup heading="Suggestions">
                         <SelectTagsPopover open={openCategoriesPopover} setOpen={setOpenCategoriesPopover} returnFocusRef={commandInputRef}>
                             <CommandItem onSelect={() => setOpenCategoriesPopover(true)}>
-                                <PopoverCommandItemContent title='Select categories' icon={<TargetIcon className="size-5 mr-2" />} />
+                                <PopoverCommandItemContent title='Select tags' icon={<TargetIcon className="size-5 mr-2" />} />
                             </CommandItem>
                         </SelectTagsPopover>
                         <SelectAgentPopover open={openAgentPopover} setOpen={setOpenAgentPopover} returnFocusRef={commandInputRef}>
@@ -109,24 +112,35 @@ export function CommandMenu() {
                         </SelectAgentPopover>
                     </CommandGroup>
                     <CommandSeparator />
-                    <CommandGroup heading="User">
-                        <CommandItem onSelect={() => toast.message("Redirecting to Profile")}>
-                            <PersonIcon className="size-5 mr-2" />
-                            Profile
+                    <CommandGroup heading="Manage">
+                        <CommandItem onSelect={() => redirect('docs')}>
+                            <FileIcon className="size-5 mr-2" />
+                            Documents
                         </CommandItem>
+                        <CommandItem onSelect={() => redirect('tags')}>
+                            <BookmarkIcon className="size-5 mr-2" />
+                            Tags
+                        </CommandItem>
+                        <CommandItem onSelect={() => redirect('agents')}>
+                            <RocketIcon className="size-5 mr-2" />
+                            Agents
+                        </CommandItem>
+                    </CommandGroup>
+                    <CommandSeparator />
+                    <CommandGroup heading="User">
                         <CommandItem onSelect={() => toast.message("Redirecting to Settings")}>
                             <GearIcon className="size-5 mr-2" />
                             Settings
                         </CommandItem>
                     </CommandGroup>
+                    <CommandSeparator />
                     <CommandGroup heading="Theme & Styling">
                         <CommandItem onSelect={() => setTheme("dark")}><MoonIcon className="size-5 mr-2" />Change theme to dark</CommandItem>
                         <CommandItem onSelect={() => setTheme("light")}><SunIcon className="size-5 mr-2" />Change theme to light</CommandItem>
                         {/* <SubItem onSelect={() => { toast.message("Change theme to dark") }}>Change theme to dark</SubItem>
                         <SubItem onSelect={() => { toast.message("Change theme to light") }}>Change theme to light</SubItem> */}
                     </CommandGroup>
-
-                    <CommandSeparator />
+                    {/* <CommandSeparator />
                     <CommandGroup heading="Projects & Teams">
                         {!page && (
                             <>
@@ -148,7 +162,7 @@ export function CommandMenu() {
                                 <CommandItem onSelect={() => { toast.message("Team 2"); setPages([...pages.filter(page => page != 'teams')]) }}>Team 2</CommandItem>
                             </>
                         )}
-                    </CommandGroup>
+                    </CommandGroup> */}
                 </CommandList>
             </CommandDialog >
         </>

@@ -77,7 +77,7 @@ export function SelectAgentPopover({ children, className, open, setOpen, returnF
                         🤖 {usedAgent?.name}
 
                     </div>
-                    <CommandInput placeholder="Change categories..." />
+                    <CommandInput placeholder="Change agent..." />
                     <CommandList>
                         <CommandEmpty>No results found.</CommandEmpty>
                         <CommandGroup>

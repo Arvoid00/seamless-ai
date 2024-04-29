@@ -68,7 +68,7 @@ export function SelectTagsPopover({ children, className, open, setOpen, returnFo
                             </Badge>
                         ))}</div>}
                     </div>
-                    <CommandInput placeholder="Change categories..." />
+                    <CommandInput placeholder="Change tags..." />
                     <CommandList>
                         <CommandEmpty>No results found.</CommandEmpty>
                         <CommandGroup>
