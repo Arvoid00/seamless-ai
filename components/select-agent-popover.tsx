@@ -24,6 +24,7 @@ import { badgeStyle } from "./ui/badge"
 import { SupabaseAgent, SupabaseTag } from "@/types/supabase"
 import { useAgent } from "@/lib/hooks/use-current-agent"
 import { getAgents } from "@/app/agents/actions"
+import { useRouter } from "next/navigation"
 
 type SelectTagsPopoverProps = {
     children?: React.ReactNode
@@ -37,6 +38,7 @@ export function SelectAgentPopover({ children, className, open, setOpen, returnF
     const inputRef = React.useRef<HTMLInputElement>(null);
     const [agents, setAgents] = React.useState<SupabaseAgent[]>([])
     const { agent: usedAgent, setAgent } = useAgent()
+    const router = useRouter()
 
     React.useEffect(() => {
         const fetchAgents = async () => {
@@ -50,11 +52,12 @@ export function SelectAgentPopover({ children, className, open, setOpen, returnF
 
     const switchAgent = (agent: SupabaseAgent) => {
         setAgent(agent)
-        // setSelectedTags((currentTags) =>
-        //     !currentTags.includes(tag)
-        //         ? [...currentTags, tag]
-        //         : currentTags.filter((t) => t.value !== tag.value)
-        // );
+
+        const url = window.location.href
+        const oldAgent = url.split('/')[3]
+        const newUrl = url.replace(oldAgent, agent.name.toLowerCase())
+
+        window.history.replaceState(null, "", newUrl) // Update the URL to reflect the selected agent
         inputRef?.current?.focus();
     };
 
