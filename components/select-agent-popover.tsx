@@ -93,7 +93,7 @@ export function SelectAgentPopover({ children, className, open, setOpen, returnF
                             >
                                 <Check
                                     className={cn(
-                                        "mr-2 h-4 w-4",
+                                        "mr-2 size-4",
                                         !usedAgent ? "opacity-100" : "opacity-0"
                                     )}
                                 />
@@ -109,7 +109,7 @@ export function SelectAgentPopover({ children, className, open, setOpen, returnF
                                     >
                                         <Check
                                             className={cn(
-                                                "mr-2 h-4 w-4",
+                                                "mr-2 size-4",
                                                 isActive ? "opacity-100" : "opacity-0"
                                             )}
                                         />

@@ -157,7 +157,7 @@ export function FancyMultiSelect() {
                             {selectedValues.length > 2 &&
                                 `${selectedValues.length} labels selected`}
                         </span>
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[200px] p-0">
@@ -179,13 +179,13 @@ export function FancyMultiSelect() {
                                     >
                                         <Check
                                             className={cn(
-                                                "mr-2 h-4 w-4",
+                                                "mr-2 size-4",
                                                 isActive ? "opacity-100" : "opacity-0"
                                             )}
                                         />
                                         <div className="flex-1">{framework.label}</div>
                                         <div
-                                            className="h-4 w-4 rounded-full"
+                                            className="size-4 rounded-full"
                                             style={{ backgroundColor: framework.color }}
                                         />
                                     </CommandItem>
@@ -203,8 +203,8 @@ export function FancyMultiSelect() {
                                 className="text-xs text-muted-foreground"
                                 onSelect={() => setOpenDialog(true)}
                             >
-                                <div className={cn("mr-2 h-4 w-4")} />
-                                <Edit2 className="mr-2 h-2.5 w-2.5" />
+                                <div className={cn("mr-2 size-4")} />
+                                <Edit2 className="mr-2 size-2.5" />
                                 Edit Labels
                             </CommandItem>
                         </CommandGroup>
@@ -298,7 +298,7 @@ const CommandItemCreate = ({
             className="text-xs text-muted-foreground"
             onSelect={onSelect}
         >
-            <div className={cn("mr-2 h-4 w-4")} />
+            <div className={cn("mr-2 size-4")} />
             Create new label &quot;{inputValue}&quot;
         </CommandItem>
     );

@@ -48,7 +48,7 @@ export const columns: ColumnDef<SupabaseTag>[] = [
                     {label && <Badge variant="outline">{label.label}</Badge>}
                     <span className="max-w-[500px] truncate font-medium">
                         <div
-                            className="h-4 w-4 rounded-full"
+                            className="size-4 rounded-full"
                             style={{ backgroundColor: row.getValue("color") }}
                         />
                     </span>

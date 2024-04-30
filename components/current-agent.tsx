@@ -17,6 +17,7 @@ function CurrentAgent() {
             <div className="flex items-center space-x-5 justify-between">
                 <span className="">🤖 {agent.name}</span>
                 <div>
+                    {/* @ts-expect-error Type 'Json' is not an array type.ts(2461) */}
                     {[...agent?.tags].map(tag => (
                         < Badge
                             key={tag.value}
