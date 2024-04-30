@@ -143,12 +143,13 @@ export const columns: ColumnDef<SupabaseAgent>[] = [
         ),
         cell: ({ row }) => {
             const label = labels.find((label) => label.value === row.original.name)
+            const functions = (row.getValue("functions") ?? []) as string[]
 
             return (
                 <div className="flex space-x-2">
                     {label && <Badge variant="outline">{label.label}</Badge>}
                     <span className="max-w-[500px] truncate font-medium">
-                        {row.getValue("functions")}
+                        {functions.map((func: any) => func).join(", ")}
                     </span>
                 </div>
             )

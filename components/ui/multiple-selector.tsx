@@ -14,6 +14,8 @@ import { pickRandomColor } from '@/lib/hooks/use-tags';
 import { badgeStyle } from '@/components/ui/badge';
 import { createTag } from '@/app/tags/actions';
 import { toast } from 'sonner';
+import { UseFormReturn } from 'react-hook-form';
+import { AgentSchema } from '../agent-dialog';
 
 interface GroupOption {
     [key: string]: SupabaseTag[];
@@ -69,6 +71,7 @@ interface MultipleSelectorProps {
     selected: SelectedTagsProps;
     setSelected: React.Dispatch<React.SetStateAction<SelectedTagsProps>>;
     forFile: string;
+    form?: UseFormReturn<AgentSchema>
 }
 
 export interface MultipleSelectorRef {
@@ -177,6 +180,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
             selected,
             setSelected,
             forFile,
+            form,
         }: MultipleSelectorProps,
         ref: React.Ref<MultipleSelectorRef>,
     ) => {
@@ -205,6 +209,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
             (option: SupabaseTag) => {
                 const newOptions = currentFileTags.filter((s) => s.value !== option.value);
                 setSelected({ ...selected, [forFile]: newOptions });
+                form?.setValue('tags', JSON.stringify(newOptions));
                 onChange?.(newOptions);
             },
             [onChange, selected],
@@ -231,6 +236,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
         useEffect(() => {
             if (value) {
                 setSelected({ ...selected, [forFile]: value });
+                form?.setValue('tags', JSON.stringify(value));
             }
         }, [value]);
 
@@ -298,6 +304,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                         }
                         const newOptions = [...currentFileTags, data];
                         setSelected({ ...selected, [forFile]: newOptions });
+                        form?.setValue('tags', JSON.stringify(newOptions));
                         onChange?.(data);
                     }}
                 >{`Create "${inputValue}"`}</CommandItem>
@@ -469,6 +476,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                                                                 setInputValue('');
                                                                 const newOptions = [...currentFileTags, option];
                                                                 setSelected({ ...selected, [forFile]: newOptions });
+                                                                form?.setValue('tags', JSON.stringify(newOptions));
                                                                 onChange?.(newOptions);
 
                                                             }}

@@ -27,6 +27,7 @@ import { Textarea } from "./ui/textarea";
 import { useTags } from "@/lib/hooks/use-tags";
 import TagSelector from "./tag-selector";
 import { SelectedTagsProps } from "./drag-drop";
+import { FunctionMultiSelect } from "./function-multiselect";
 
 export type AgentSchema = z.infer<typeof AgentSchema>;
 
@@ -45,7 +46,7 @@ const AgentSchema = z.object({
     model: z.string().min(1, {
         message: "Model cannot be empty",
     }),
-    functions: z.string().array(),
+    functions: z.string().optional(),
     temperature: z.number().min(0, {
         message: "Strictness cannot be below zero",
     }).max(1, {
@@ -73,7 +74,7 @@ const AgentDialog = ({ title, action, open, agent }: AgentDialogProps) => {
         prompt: agent?.prompt ?? "",
         tags: JSON.stringify(agentTags["agent"]) ?? "",
         model: agent?.model ?? "",
-        functions: agent?.functions ?? [],
+        functions: JSON.stringify(agent?.functions) ?? "",
         temperature: agent?.temperature ?? 0.3,
     }
 
@@ -101,25 +102,35 @@ const AgentDialog = ({ title, action, open, agent }: AgentDialogProps) => {
             if (!Array.isArray(parsedTags)) throw new Error('Tags are not an array.');
         } catch (error) {
             console.error('Error parsing tags:', error);
-            throw new Error("Error parsing tags");
+            parsedTags = []
+        }
+        let parsedFunctions;
+        try {
+            parsedFunctions = JSON.parse(agentObj.functions || "[]");
+            if (!Array.isArray(parsedFunctions)) throw new Error('Functions are not an array.');
+        } catch (error) {
+            console.error('Error parsing functions:', error);
+            parsedFunctions = []
         }
 
         const values = {
             ...agentObj,
             tags: parsedTags,
+            functions: parsedFunctions,
             ...(action === "edit" && { id: agent?.id })
         };
 
         const { data, error } = await upsertAgent(values);
+
         if (error) {
             console.error("Error upserting agent:", error);
             toast.error("Error upserting agent", { description: error.message });
             setIsOpen(false);
             return;
         }
+        setAgentTags({ "agent": [] });
         setIsOpen(false);
         router.refresh();
-
     };
 
     return (
@@ -205,13 +216,7 @@ const AgentDialog = ({ title, action, open, agent }: AgentDialogProps) => {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Tags</FormLabel>
-                                            <TagSelector selectedTags={agentTags} setSelectedTags={setAgentTags} forFile={"agent"} />
-                                            <Input
-                                                {...register("tags")}
-                                                placeholder={"Enter the tags for the agent."}
-                                                value={JSON.stringify(agentTags.agent || [])}
-                                            // type="hidden"
-                                            />
+                                            <TagSelector form={form} selectedTags={agentTags} setSelectedTags={setAgentTags} forFile={"agent"} />
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -225,7 +230,7 @@ const AgentDialog = ({ title, action, open, agent }: AgentDialogProps) => {
                                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                 <FormControl>
                                                     <SelectTrigger>
-                                                        <SelectValue placeholder="Select a color" />
+                                                        <SelectValue placeholder="Select a model" />
                                                     </SelectTrigger>
                                                 </FormControl>
                                                 <SelectContent>
@@ -237,22 +242,7 @@ const AgentDialog = ({ title, action, open, agent }: AgentDialogProps) => {
                                         </FormItem>
                                     )}
                                 />
-                                <FormField
-                                    control={control}
-                                    name="functions"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Functions (separated with a comma: , )</FormLabel>
-                                            <Input
-                                                {...register("functions", { setValueAs: (value) => [value] })}
-                                                placeholder={
-                                                    "Enter the functions for the agent."
-                                                }
-                                            />
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                                <FunctionMultiSelect form={form} currentItems={JSON.parse((form.getValues("functions") || "[]"))} />
                                 <FormField
                                     control={control}
                                     name="temperature"
@@ -297,14 +287,13 @@ const AgentDialog = ({ title, action, open, agent }: AgentDialogProps) => {
                                 <Button
                                     type="submit"
                                     disabled={
-                                        !isDirty ||
                                         !isValid ||
                                         isSubmitting ||
                                         isSubmitted
                                     }>
                                     {action === "edit"
                                         ? "Edit"
-                                        : "Create"}{" "}Tag
+                                        : "Create"}{" "}Agent
                                 </Button>
                             </div>
                         </form>

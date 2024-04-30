@@ -25,7 +25,7 @@ export type Database = {
           tags: Json | null
           created_at: string
           description: string | null
-          functions: string[] | null
+          functions: Json | null
           id: number
           model: string | null
           name: string
@@ -36,7 +36,7 @@ export type Database = {
           tags?: Json | null
           created_at?: string
           description?: string | null
-          functions?: string[] | null
+          functions?: Json | null
           id?: number
           model?: string | null
           name: string
@@ -47,7 +47,7 @@ export type Database = {
           tags?: Json | null
           created_at?: string
           description?: string | null
-          functions?: string[] | null
+          functions?: Json | null
           id?: number
           model?: string | null
           name?: string

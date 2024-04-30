@@ -5,8 +5,10 @@ import MultipleSelector from '@/components/ui/multiple-selector';
 import { SelectedTagsProps } from './drag-drop';
 import { useTags } from '@/lib/hooks/use-tags';
 import { SupabaseTag } from '@/types/supabase';
+import { UseFormReturn } from 'react-hook-form';
+import { AgentSchema } from './agent-dialog';
 
-const TagSelector = ({ selectedTags, setSelectedTags, forFile }: { selectedTags: SelectedTagsProps, setSelectedTags: Dispatch<SetStateAction<SelectedTagsProps>>, forFile: string }) => {
+const TagSelector = ({ selectedTags, setSelectedTags, forFile, form }: { selectedTags: SelectedTagsProps, setSelectedTags: Dispatch<SetStateAction<SelectedTagsProps>>, forFile: string, form?: UseFormReturn<AgentSchema> }) => {
     const [isTriggered, setIsTriggered] = React.useState(false);
     const { tags } = useTags();
 
@@ -24,6 +26,7 @@ const TagSelector = ({ selectedTags, setSelectedTags, forFile }: { selectedTags:
     return (
         <div className="flex w-full flex-col gap-5">
             <MultipleSelector
+                form={form}
                 onSearch={async (value) => {
                     setIsTriggered(true);
                     const res = await mockSearch(value);
