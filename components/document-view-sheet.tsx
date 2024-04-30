@@ -25,12 +25,14 @@ export function DocumentViewer({ children, source, name, section, tags }: { chil
     const [documentTags, setDocumentTags] = useState<SupabaseTag[] | null>(tags ?? null)
 
     useEffect(() => {
-        const getDocument = async () => {
-            const res = await fetch(source)
-            const { error } = await res.json()
-            if (error) setError(true)
+        const checkForError = async () => {
+            const res = await fetch(source);
+            if (res.headers.get("content-type")?.includes("application/json")) {
+                const { error } = await res.json();
+                if (error) setError(true);
+            }
         }
-        getDocument()
+        checkForError()
     }, [])
 
     useEffect(() => {
