@@ -26,7 +26,6 @@ export function AgentProvider({ children }: { children: React.ReactNode }) {
     const [agent, setAgent] = useState<SupabaseAgent | null>(null);
     const pathName = usePathname()
     const agentName = pathName.split("/")[1]
-    console.log(agentName)
 
     useEffect(() => {
         const getSelectedAgent = async () => {

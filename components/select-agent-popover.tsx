@@ -22,6 +22,7 @@ import { SupabaseAgent } from "@/types/supabase"
 import { useAgent } from "@/lib/hooks/use-current-agent"
 import { getAgents } from "@/app/agents/actions"
 import { useRouter } from "next/navigation"
+import { useTags } from "@/lib/hooks/use-tags"
 
 type SelectTagsPopoverProps = {
     children?: React.ReactNode
@@ -35,6 +36,7 @@ export function SelectAgentPopover({ children, className, open, setOpen, returnF
     const inputRef = React.useRef<HTMLInputElement>(null);
     const [agents, setAgents] = React.useState<SupabaseAgent[]>([])
     const { agent: usedAgent, setAgent } = useAgent()
+    const { setSelectedTags } = useTags()
     const router = useRouter()
 
     React.useEffect(() => {
@@ -60,6 +62,7 @@ export function SelectAgentPopover({ children, className, open, setOpen, returnF
         // }
 
         setAgent(agent)
+        setSelectedTags([])
         router.push("/" + agent.name.toLowerCase())
         inputRef?.current?.focus();
     };

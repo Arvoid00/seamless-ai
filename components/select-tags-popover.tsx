@@ -86,11 +86,13 @@ export function SelectTagsPopover({ children, className, open, setOpen, returnFo
                                                 isActive ? "opacity-100" : "opacity-0"
                                             )}
                                         />
-                                        <div className="flex-1">{tag.name}</div>
-                                        <div
-                                            className="h-4 w-4 rounded-full"
-                                            style={{ backgroundColor: tag.color }}
-                                        />
+                                        <Badge
+                                            variant="outline"
+                                            style={badgeStyle(tag.color)}
+                                            className="mr-1 mb-1"
+                                        >
+                                            <div className="flex-1">{tag.name}</div>
+                                        </Badge>
                                     </CommandItem>
                                 );
                             })}
