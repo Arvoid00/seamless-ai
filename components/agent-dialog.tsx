@@ -153,117 +153,86 @@ const AgentDialog = ({ title, action, open, agent }: AgentDialogProps) => {
                         </Button>
                     )}
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[45rem]">
+                <DialogContent className="sm:max-w-[35rem] lg:max-w-[55rem] xl:max-w-[75rem]">
                     <DialogHeader>
                         <DialogTitle>{title}</DialogTitle>
                     </DialogHeader>
                     <FormProvider {...form}>
                         <form onSubmit={handleSubmit(onSubmit)}>
-                            <div className="grid gap-4 py-4">
-                                <FormField
-                                    control={control}
-                                    name="name"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Name</FormLabel>
-                                            <Input
-                                                {...register(
-                                                    "name", { setValueAs: (value) => value.trim().toLowerCase() }
-                                                )}
-                                                placeholder={
-                                                    "Enter the name of the tag."
-                                                }
-                                            />
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={control}
-                                    name="description"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>
-                                                Description
-                                            </FormLabel>
-                                            <Textarea
-                                                {...register("description")}
-                                                placeholder={"Enter the agent description."}
-                                                rows={5}
-                                            />
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={control}
-                                    name="prompt"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Prompt</FormLabel>
-                                            <Textarea
-                                                {...register("prompt")}
-                                                placeholder={"Enter the instructions for the agent."}
-                                                rows={5}
-                                            />
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={control}
-                                    name="tags"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Tags</FormLabel>
-                                            <TagSelector form={form} selectedTags={agentTags} setSelectedTags={setAgentTags} forFile={"agent"} />
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={control}
-                                    name="model"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Model</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select a model" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    <SelectItem value="gpt-3.5-turbo">GPT 3.5 Turbo</SelectItem>
-                                                    <SelectItem value="gpt-4-turbo-preview">GPT 4 Turbo Preview</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FunctionMultiSelect form={form} currentItems={JSON.parse((form.getValues("functions") || "[]"))} />
-                                <FormField
-                                    control={control}
-                                    name="temperature"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Strictness</FormLabel>
-                                            <Input
-                                                {...register("temperature", { setValueAs: (value) => parseFloat(value) })}
-                                                type="number"
-                                                min="0"
-                                                max="1"
-                                                step=".05"
-                                                placeholder={
-                                                    "Enter the functions for the agent."
-                                                }
-                                            />
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                {/* <FormField
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                <div className="grid gap-4">
+                                    <FormField
+                                        control={control}
+                                        name="name"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Name</FormLabel>
+                                                <Input
+                                                    {...register(
+                                                        "name", { setValueAs: (value) => value.trim().toLowerCase() }
+                                                    )}
+                                                    placeholder={
+                                                        "Enter the name of the tag."
+                                                    }
+                                                />
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={control}
+                                        name="tags"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Tags</FormLabel>
+                                                <TagSelector form={form} selectedTags={agentTags} setSelectedTags={setAgentTags} forFile={"agent"} />
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={control}
+                                        name="model"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Model</FormLabel>
+                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Select a model" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        <SelectItem value="gpt-3.5-turbo">GPT 3.5 Turbo</SelectItem>
+                                                        <SelectItem value="gpt-4-turbo-preview">GPT 4 Turbo Preview</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FunctionMultiSelect form={form} currentItems={JSON.parse((form.getValues("functions") || "[]"))} />
+                                    <FormField
+                                        control={control}
+                                        name="temperature"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Strictness</FormLabel>
+                                                <Input
+                                                    {...register("temperature", { setValueAs: (value) => parseFloat(value) })}
+                                                    type="number"
+                                                    min="0"
+                                                    max="1"
+                                                    step=".05"
+                                                    placeholder={
+                                                        "Enter the functions for the agent."
+                                                    }
+                                                />
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    {/* <FormField
                                     control={control}
                                     name="is_active"
                                     render={({ field }) => (
@@ -282,6 +251,42 @@ const AgentDialog = ({ title, action, open, agent }: AgentDialogProps) => {
                                         </FormItem>
                                     )}
                                 /> */}
+                                </div>
+                                <div className="grid gap-4">
+                                    <FormField
+                                        control={control}
+                                        name="description"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>
+                                                    Description
+                                                </FormLabel>
+                                                <Textarea
+                                                    {...register("description")}
+                                                    placeholder={"Enter the agent description."}
+                                                    className="w-full"
+                                                    rows={10}
+                                                />
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={control}
+                                        name="prompt"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Prompt</FormLabel>
+                                                <Textarea
+                                                    {...register("prompt")}
+                                                    placeholder={"Enter the instructions for the agent."}
+                                                    rows={10}
+                                                />
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
                             </div>
                             <div className="grid gap-4 py-4">
                                 <Button
