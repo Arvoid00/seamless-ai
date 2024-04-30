@@ -68,11 +68,9 @@ export function ChatShareDialog({
           <Button
             disabled={isSharePending}
             onClick={() => {
-              // @ts-ignore
               startShareTransition(async () => {
                 const result = await shareChat(chat)
                 console.log('Share chat result:', result);
-
 
                 if (result && 'error' in result) {
                   toast.error(result.error)

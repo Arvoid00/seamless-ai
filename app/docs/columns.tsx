@@ -179,7 +179,7 @@ export const columns: ColumnDef<SupabaseDocument>[] = [
     },
     {
         id: "viewer",
-        // @ts-ignore
+        // @ts-expect-error Property 'tags' does not exist on type 'string | number | boolean | { [key: string]: Json | undefined; } | Json[]'.
         cell: ({ row }) => <DocumentViewer name={row.original.name!} source={row.original.source!} tags={row.original.metadata?.tags} />,
     },
     {

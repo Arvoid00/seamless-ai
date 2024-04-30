@@ -65,6 +65,7 @@ export function PromptForm({
         ])
 
         // Submit and get response message
+        // @ts-expect-error Type 'Json | undefined' is not an array type. ts(2461)
         const body = { content: value, tags: [...selectedTags, ...(agent ? agent?.tags : [])], agent: agent }
         const responseMessage = await submitUserMessage(body)
         setMessages(currentMessages => [...currentMessages, responseMessage])

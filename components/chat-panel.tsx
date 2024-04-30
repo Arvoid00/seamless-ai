@@ -88,7 +88,7 @@ export function ChatPanel({
                       display: <UserMessage>{example.message}</UserMessage>
                     }
                   ])
-
+                  // @ts-expect-error Type 'Json | undefined' is not an array type. ts(2461)
                   const body = { content: example.message, tags: [...selectedTags, ...agent?.tags], agent: agent }
                   const responseMessage = await submitUserMessage(body)
 

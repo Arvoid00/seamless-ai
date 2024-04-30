@@ -62,7 +62,7 @@ export function VectorMessage({
   usage?: { prompt_tokens: number, completion_tokens: number, total_tokens: number }
   agent?: SupabaseAgent
   tags?: SupabaseTag[]
-  sections: PageSection[]
+  sections?: PageSection[]
   className?: string
 }) {
   const content = data.message.content
@@ -97,7 +97,7 @@ export function VectorMessage({
                     sections.map((section, index) => (
                       <div key={index} className='mb-2 gap-x-1'>
                         {section.metadata?.fileName && <DocumentViewer name={section.metadata?.fileName!} source={section.metadata?.sourcePage!} section={section}>
-                          <Badge className="text-xs cursor-pointer">{section.metadata.fileName} @ P{section.metadata?.loc?.pageNumber ?? ""}</Badge>
+                          <Badge className="text-xs cursor-pointer mr-1 mb-1">{section.metadata.fileName} @ P{section.metadata?.loc?.pageNumber ?? ""}</Badge>
                         </DocumentViewer>}
                         {/* <p className='text-xs text-gray-500'>Similarity score: {section.similarity}</p> */}
                       </div>
@@ -114,8 +114,10 @@ export function VectorMessage({
                   </div>
                 )}
 
+                {/* @ts-expect-error Type 'Json | undefined' is not an array type. ts(2461) */}
                 {agent && agent?.tags?.length ? <div className='flex text-sm my-2'>
                   <span className='mr-5'>Used Agent: 🤖 {agent.name}</span>
+                  {/* @ts-expect-error Type 'Json | undefined' is not an array type. ts(2461) */}
                   <div>{agent.tags.map(({ name, value, color }) => (
                     <Badge
                       key={value}
@@ -128,7 +130,7 @@ export function VectorMessage({
                   ))}</div>
                 </div> : null}
 
-                {tags && tags.length ? <div className='flex text-sm my-2'>
+                {!agent && tags && tags.length ? <div className='flex text-sm my-2'>
                   <span className='mr-5'>Used Tags: </span>
                   <div>{tags.map(({ name, value, color }) => (
                     <Badge
@@ -241,7 +243,6 @@ export function SpinnerMessage({ children, message }: { children?: React.ReactNo
         <span className='mr-2'>{spinner}</span> <span>{message}</span>
         {children}
       </div>
-
     </div>
   )
 }

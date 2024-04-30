@@ -1,4 +1,6 @@
+import { PageSection } from '@/app/vectorsearch/route'
 import { Message } from 'ai'
+import { SupabaseTag } from './supabase'
 
 export interface Chat extends Record<string, any> {
   id: string
@@ -6,8 +8,13 @@ export interface Chat extends Record<string, any> {
   createdAt: Date
   userId: string
   path: string
-  messages: Message[]
+  messages: CustomMessage[]
   sharePath?: string
+}
+
+export interface CustomMessage extends Message {
+  sections?: PageSection[] | undefined
+  tags?: SupabaseTag[]
 }
 
 export type ServerActionResult<Result> = Promise<

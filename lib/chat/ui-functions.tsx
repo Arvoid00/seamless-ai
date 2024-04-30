@@ -131,7 +131,7 @@ export async function vectorSearch(query: string) {
         }
 
         // Perform text completion request
-        // @ts-ignore
+        // @ts-expect-error Cannot find name 'CreateCompletionRequest'.ts(2304)
         const completionOptions: CreateCompletionRequest = {
             model: 'gpt-4-turbo-preview',
             max_tokens: 512,

@@ -27,7 +27,6 @@ export async function generateMetadata({
 export default async function ChatPage({ params }: ChatPageProps) {
   const user = await getUser()
   const missingKeys = await getMissingKeys()
-  console.log('ChatPage', params)
 
   const chatId = params.id
   const agentName = params.agent

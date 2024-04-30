@@ -64,7 +64,7 @@ type AgentDialogProps = {
 const AgentDialog = ({ title, action, open, agent }: AgentDialogProps) => {
     const [isOpen, setIsOpen] = useState(open ?? false);
     const router = useRouter();
-    // @ts-ignore
+    // @ts-expect-error Type 'string' is not assignable to type '{ color: string; created_at: string; group: string | null; id: number; name: string; value: string; }[]'.ts(2322)
     const [agentTags, setAgentTags] = useState<SelectedTagsProps>({ "agent": agent?.tags ?? [] });
 
     const defaultValues = {
@@ -109,19 +109,6 @@ const AgentDialog = ({ title, action, open, agent }: AgentDialogProps) => {
             tags: parsedTags,
             ...(action === "edit" && { id: agent?.id })
         };
-
-        // const parsedTags = JSON.parse(agentObj.tags || "[]")
-        // let values =
-        //     action === "edit"
-        //         ? { id: agent?.id, tags: parsedTags, ...agentObj }
-        //         : { tags: parsedTags, ...agentObj }
-
-        // // Ensure that parsedTags is an array before passing it to JSON.parse
-        // if (Array.isArray(parsedTags)) {
-        //     values.tags = JSON.parse(JSON.stringify(parsedTags));
-        // } else {
-        //     console.error('parsedTags is not an array:', parsedTags);
-        // }
 
         const { data, error } = await upsertAgent(values);
         if (error) {
