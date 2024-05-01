@@ -30,12 +30,26 @@ export async function getChatsByAgent(
 ) {
   try {
     const supabase = createClient()
+
+    const agentPayload = agentId ? { id: agentId } : { id: null }
+    console.log('agentPayload', agentPayload)
+
+    const { data: chatsAgentContent } = await supabase
+      .from('chats')
+      .select('payload->agent->id')
+      .order('payload->createdAt', { ascending: false })
+      .eq('user_id', userId)
+      .eq('payload->agent->id', agentPayload)
+      .throwOnError()
+
+    console.log('chatsAgentContent', chatsAgentContent)
+
     const { data: chats } = await supabase
       .from('chats')
       .select('payload')
       .order('payload->createdAt', { ascending: false })
       .eq('user_id', userId)
-      .eq('payload->agent->id', agentId)
+      // .eq('payload->agent->id', !agentId ? null : agentId)
       .throwOnError()
 
     return (chats?.map(entry => entry.payload) as Chat[]) ?? []

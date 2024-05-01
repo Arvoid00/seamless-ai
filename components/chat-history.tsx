@@ -8,7 +8,6 @@ import { buttonVariants } from '@/components/ui/button'
 import { IconPlus } from '@/components/ui/icons'
 import { headers } from 'next/headers'
 import { getAgentByName } from '@/app/agents/actions'
-import { toast } from 'sonner'
 
 interface ChatHistoryProps {
   userId?: string
