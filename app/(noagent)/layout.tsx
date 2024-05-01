@@ -11,7 +11,7 @@ export default async function AgentLayout({ children, params }: ChatLayoutProps)
 
     return (
         <div className="relative flex h-[calc(100vh_-_theme(spacing.16))] overflow-hidden">
-            <SidebarDesktop />
+            <SidebarDesktop agentParam='' />
             {children}
         </div>
     )

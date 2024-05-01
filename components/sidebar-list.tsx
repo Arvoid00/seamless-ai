@@ -13,8 +13,8 @@ interface SidebarListProps {
 
 const loadChats = async (userId: string, agentId: number | undefined) => {
   console.log(userId, agentId);
-  // return await getChatsByAgent(userId, agentId)
-  return await getChats(userId)
+  return await getChatsByAgent(userId, agentId)
+  // return await getChats(userId)
 }
 
 export async function SidebarList({ userId, agent }: SidebarListProps) {

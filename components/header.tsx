@@ -28,7 +28,7 @@ async function UserOrLogin() {
       {user ? (
         <>
           <SidebarMobile>
-            <ChatHistory userId={user.id} />
+            <ChatHistory userId={user.id} agentName='' />
           </SidebarMobile>
           <SidebarToggle />
         </>

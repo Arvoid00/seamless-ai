@@ -6,18 +6,15 @@ import { cn } from '@/lib/utils'
 import { SidebarList } from '@/components/sidebar-list'
 import { buttonVariants } from '@/components/ui/button'
 import { IconPlus } from '@/components/ui/icons'
-import { headers } from 'next/headers'
 import { getAgentByName } from '@/app/agents/actions'
 
 interface ChatHistoryProps {
-  userId?: string
+  userId: string
+  agentName: string
 }
 
-export async function ChatHistory({ userId }: ChatHistoryProps) {
-  const headersList = headers()
-  const referer = headersList.get('referer')
-  // console.log(referer)
-  const agentName = referer?.split('/')[3] ?? ''
+export async function ChatHistory({ userId, agentName }: ChatHistoryProps) {
+
   const { data: agent, error } = await getAgentByName(agentName)
   if (!agent || error) console.error('Agent not found')
   // console.log("Agent", agent)

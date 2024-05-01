@@ -19,6 +19,7 @@ import CurrentAgent from './current-agent'
 import CurrentTags from './current-tags'
 import { SupabaseAgent } from '@/types/supabase'
 import { getAgents } from '@/app/agents/actions'
+import { useRouter } from 'next/navigation'
 
 export interface ChatPanelProps {
   id?: string
@@ -44,6 +45,7 @@ export function ChatPanel({
   const { agent, setAgent } = useAgent()
   const { selectedTags } = useTags()
   const [agents, setAgents] = React.useState<SupabaseAgent[]>([])
+  const router = useRouter()
 
   React.useEffect(() => {
     const fetchAgents = async () => {
@@ -75,6 +77,13 @@ export function ChatPanel({
     //   subheading: `recent events about $DOGE?`,
     //   message: `What are some recent events about $DOGE?`
     // }
+  ]
+
+  const exampleInputs = [
+    "Summarize Shining a light in the Black Box of Neural Networks",
+    "What are shapley values as described in the document?",
+    "Tell me about the personality types using the provided documents",
+    "What are the key points of the Northwind Benefit plus plan"
   ]
 
   return (
@@ -117,7 +126,7 @@ export function ChatPanel({
               </div>
             ))}
         </div>
-        <p className='font-semibold p-1'>Use an agent</p>
+        {!agent && <p className='font-semibold p-1'>Use an agent</p>}
         <div className="mb-4 grid grid-cols-2 gap-2 px-4 sm:px-0">
           {messages.length === 0 && !agent &&
             agents.map((agent, index) => (
@@ -127,6 +136,7 @@ export function ChatPanel({
                   }`}
                 onClick={async () => {
                   setAgent(agent)
+                  router.push(`${agent.name}`)
                 }}
               >
                 <div className="text-sm font-semibold mb-1">🤖 {agent.name}</div>
@@ -137,6 +147,23 @@ export function ChatPanel({
                       {tag.name}
                     </Badge>
                   ))}
+                </div>
+              </div>
+            ))}
+        </div>
+        <p className='font-semibold p-1'>Example questions</p>
+        <div className="mb-4 grid grid-cols-2 gap-2 px-4 sm:px-0">
+          {messages.length === 0 &&
+            exampleInputs.map((example, index) => (
+              <div
+                key={example}
+                className={`cursor-pointer rounded-lg border bg-white p-4 hover:bg-zinc-50 dark:bg-zinc-950 dark:hover:bg-zinc-900 ${index > 1 && 'hidden md:block'
+                  }`}
+                onClick={async () => setInput(example)}
+              >
+                {/* <div className="text-sm font-semibold">{example}</div> */}
+                <div className="text-sm text-zinc-600">
+                  {example}
                 </div>
               </div>
             ))}
