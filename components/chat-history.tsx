@@ -6,16 +6,26 @@ import { cn } from '@/lib/utils'
 import { SidebarList } from '@/components/sidebar-list'
 import { buttonVariants } from '@/components/ui/button'
 import { IconPlus } from '@/components/ui/icons'
+import { headers } from 'next/headers'
+import { getAgentByName } from '@/app/agents/actions'
+import { toast } from 'sonner'
 
 interface ChatHistoryProps {
   userId?: string
 }
 
 export async function ChatHistory({ userId }: ChatHistoryProps) {
+  const headersList = headers()
+  const referer = headersList.get('referer')
+  const agentName = referer?.split('/')[3] ?? ''
+  const { data: agent, error } = await getAgentByName(agentName)
+  if (!agent || error) console.error('Agent not found')
+  // console.log("Agent", agent)
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between p-4">
-        <h4 className="text-sm font-medium">Chat History</h4>
+        <h4 className="text-sm font-medium">Chat History {agent?.name && `For ${agent.name}`}</h4>
       </div>
       <div className="mb-2 px-2">
         <Link
@@ -41,7 +51,7 @@ export async function ChatHistory({ userId }: ChatHistoryProps) {
           </div>
         }
       >
-        <SidebarList userId={userId} />
+        <SidebarList userId={userId} agent={agent} />
       </React.Suspense>
     </div>
   )

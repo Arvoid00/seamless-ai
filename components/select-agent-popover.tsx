@@ -89,7 +89,7 @@ export function SelectAgentPopover({ children, className, open, setOpen, returnF
                             <CommandItem
                                 key={'none'}
                                 value={'None'}
-                                onSelect={() => setAgent(null)}
+                                onSelect={() => { setAgent(null); setSelectedTags([]); router.push("/") }}
                             >
                                 <Check
                                     className={cn(

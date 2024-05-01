@@ -111,6 +111,7 @@ export function CommandMenu() {
         const isActive = agent.id === usedAgent?.id
         isActive ? setAgent(null) : setAgent(agent)
         setSelectedTags([])
+        router.push('/' + isActive ? "" : agent.name)
 
         toast.message(<>
             <div className='flex items-center'></div>
@@ -174,7 +175,11 @@ export function CommandMenu() {
                 <CommandInput placeholder="Type a command or search..." ref={commandInputRef} value={search} onValueChange={setSearch} />
                 <CommandList>
                     {loading && <CommandLoading>Fetching data...</CommandLoading>}
-                    <CommandEmpty>No results found.</CommandEmpty>
+                    <CommandEmpty>
+                        {usedAgent && tags.some(tag => tag.name.toLowerCase().includes(search.toLowerCase()))
+                            ? "Unselect your agent to add custom tags"
+                            : "No results found."}
+                    </CommandEmpty>
                     {pages.length == 1 && (<><CommandGroup heading="Suggestions">
                         <SelectTagsPopover open={openCategoriesPopover} setOpen={setOpenCategoriesPopover} returnFocusRef={commandInputRef}>
                             <CommandItem onSelect={() => setOpenCategoriesPopover(true)} disabled={!!usedAgent}>
@@ -265,7 +270,7 @@ export function CommandMenu() {
                     </CommandGroup>
 
                     <CommandGroup>
-                        {!usedAgent && tags.map((tag) => {
+                        {!usedAgent ? tags.map((tag) => {
                             const isActive = selectedTags.includes(tag);
                             return (
                                 <SubItem
@@ -285,7 +290,7 @@ export function CommandMenu() {
                                     </Badge>
                                 </SubItem>
                             );
-                        })}
+                        }) : null}
                     </CommandGroup>
 
                 </CommandList>

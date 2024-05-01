@@ -25,10 +25,7 @@ export async function generateMetadata({
 export default async function AgentPage({ params }: ChatPageProps) {
   const user = await getUser()
   const missingKeys = await getMissingKeys()
-  console.log('AgentPage', params)
   const agentName = params.agent
-
-  // let [agentName, chatRoute, chatId] = params.agent
 
   if (!user) {
     redirect(`/login?next=/${agentName}`)

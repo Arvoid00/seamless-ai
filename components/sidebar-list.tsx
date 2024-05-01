@@ -1,20 +1,24 @@
-import { clearChats, getChats } from '@/app/actions'
+import { clearChats, getChats, getChatsByAgent } from '@/app/actions'
 import { ClearHistory } from '@/components/clear-history'
 import { SidebarItems } from '@/components/sidebar-items'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { SupabaseAgent } from '@/types/supabase'
 import { cache } from 'react'
 
 interface SidebarListProps {
-  userId?: string
+  userId: string
+  agent?: SupabaseAgent
   children?: React.ReactNode
 }
 
-const loadChats = cache(async (userId?: string) => {
+const loadChats = cache(async (userId: string, agentId: number | undefined) => {
+  console.log(userId, agentId);
+  // return await getChatsByAgent(userId, agentId)
   return await getChats(userId)
 })
 
-export async function SidebarList({ userId }: SidebarListProps) {
-  const chats = await loadChats(userId)
+export async function SidebarList({ userId, agent }: SidebarListProps) {
+  const chats = await loadChats(userId, agent?.id)
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">

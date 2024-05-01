@@ -22,7 +22,6 @@ import {
 } from '@/components/ui/tooltip'
 
 async function UserOrLogin() {
-  // const session = (await auth()) as Session
   const user = await getUser()
   return (
     <>

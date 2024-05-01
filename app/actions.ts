@@ -24,6 +24,26 @@ export async function getChats(userId?: string | null) {
   }
 }
 
+export async function getChatsByAgent(
+  userId: string | null,
+  agentId: number | undefined
+) {
+  try {
+    const supabase = createClient()
+    const { data: chats } = await supabase
+      .from('chats')
+      .select('payload')
+      .order('payload->createdAt', { ascending: false })
+      .eq('user_id', userId)
+      .eq('payload->agent->id', agentId)
+      .throwOnError()
+
+    return (chats?.map(entry => entry.payload) as Chat[]) ?? []
+  } catch (error) {
+    return []
+  }
+}
+
 export async function getChat(id: string) {
   const supabase = createClient()
   const { data } = await supabase
