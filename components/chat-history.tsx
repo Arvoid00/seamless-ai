@@ -16,6 +16,7 @@ interface ChatHistoryProps {
 export async function ChatHistory({ userId }: ChatHistoryProps) {
   const headersList = headers()
   const referer = headersList.get('referer')
+  // console.log(referer)
   const agentName = referer?.split('/')[3] ?? ''
   const { data: agent, error } = await getAgentByName(agentName)
   if (!agent || error) console.error('Agent not found')
@@ -24,7 +25,7 @@ export async function ChatHistory({ userId }: ChatHistoryProps) {
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between p-4">
-        <h4 className="text-sm font-medium">Chat History {agent?.name && `For ${agent.name}`}</h4>
+        <h4 className="text-sm font-medium">Chat History {agent?.name && `for 🤖 ${agent.name}`}</h4>
       </div>
       <div className="mb-2 px-2">
         <Link

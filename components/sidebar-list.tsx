@@ -11,11 +11,11 @@ interface SidebarListProps {
   children?: React.ReactNode
 }
 
-const loadChats = cache(async (userId: string, agentId: number | undefined) => {
+const loadChats = async (userId: string, agentId: number | undefined) => {
   console.log(userId, agentId);
   // return await getChatsByAgent(userId, agentId)
   return await getChats(userId)
-})
+}
 
 export async function SidebarList({ userId, agent }: SidebarListProps) {
   const chats = await loadChats(userId, agent?.id)

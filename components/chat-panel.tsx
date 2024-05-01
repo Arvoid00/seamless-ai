@@ -17,6 +17,8 @@ import { useAgent } from '@/lib/hooks/use-current-agent'
 import { useTags } from '@/lib/hooks/use-tags'
 import CurrentAgent from './current-agent'
 import CurrentTags from './current-tags'
+import { SupabaseAgent } from '@/types/supabase'
+import { getAgents } from '@/app/agents/actions'
 
 export interface ChatPanelProps {
   id?: string
@@ -39,8 +41,18 @@ export function ChatPanel({
   const [messages, setMessages] = useUIState<typeof AI>()
   const { submitUserMessage } = useActions()
   const [shareDialogOpen, setShareDialogOpen] = React.useState(false)
-  const { agent } = useAgent()
+  const { agent, setAgent } = useAgent()
   const { selectedTags } = useTags()
+  const [agents, setAgents] = React.useState<SupabaseAgent[]>([])
+
+  React.useEffect(() => {
+    const fetchAgents = async () => {
+      const { data, error } = await getAgents()
+      if (error) console.error(error)
+      if (data) setAgents(data)
+    }
+    fetchAgents()
+  }, [])
 
   const exampleMessages = [
     {
@@ -53,16 +65,16 @@ export function ChatPanel({
       subheading: '$DOGE right now?',
       message: 'What is the price of $DOGE right now?'
     },
-    {
-      heading: 'I would like to buy',
-      subheading: '42 $DOGE',
-      message: `I would like to buy 42 $DOGE`
-    },
-    {
-      heading: 'What are some',
-      subheading: `recent events about $DOGE?`,
-      message: `What are some recent events about $DOGE?`
-    }
+    // {
+    //   heading: 'I would like to buy',
+    //   subheading: '42 $DOGE',
+    //   message: `I would like to buy 42 $DOGE`
+    // },
+    // {
+    //   heading: 'What are some',
+    //   subheading: `recent events about $DOGE?`,
+    //   message: `What are some recent events about $DOGE?`
+    // }
   ]
 
   return (
@@ -73,6 +85,7 @@ export function ChatPanel({
       />
 
       <div className="mx-auto sm:max-w-2xl sm:px-4">
+        <p className='font-semibold p-1'>Render components</p>
         <div className="mb-4 grid grid-cols-2 gap-2 px-4 sm:px-0">
           {messages.length === 0 &&
             exampleMessages.map((example, index) => (
@@ -88,8 +101,7 @@ export function ChatPanel({
                       display: <UserMessage>{example.message}</UserMessage>
                     }
                   ])
-                  // @ts-expect-error Type 'Json | undefined' is not an array type. ts(2461)
-                  const body = { content: example.message, tags: [...selectedTags, ...agent?.tags], agent: agent }
+                  const body = { content: example.message, tags: selectedTags, agent: agent }
                   const responseMessage = await submitUserMessage(body)
 
                   setMessages(currentMessages => [
@@ -101,6 +113,30 @@ export function ChatPanel({
                 <div className="text-sm font-semibold">{example.heading}</div>
                 <div className="text-sm text-zinc-600">
                   {example.subheading}
+                </div>
+              </div>
+            ))}
+        </div>
+        <p className='font-semibold p-1'>Use an agent</p>
+        <div className="mb-4 grid grid-cols-2 gap-2 px-4 sm:px-0">
+          {messages.length === 0 && !agent &&
+            agents.map((agent, index) => (
+              <div
+                key={agent.id}
+                className={`cursor-pointer rounded-lg border bg-white p-4 hover:bg-zinc-50 dark:bg-zinc-950 dark:hover:bg-zinc-900 ${index > 1 && 'hidden md:block'
+                  }`}
+                onClick={async () => {
+                  setAgent(agent)
+                }}
+              >
+                <div className="text-sm font-semibold mb-1">🤖 {agent.name}</div>
+                <div className="text-sm text-zinc-600">
+                  {/* @ts-ignore Property 'map' does not exist on type 'string | number | boolean | { [key: string]: Json | undefined; } | Json[]'. */}
+                  {agent.tags?.map(tag => (
+                    <Badge key={tag.id} style={badgeStyle(tag.color)} className='mr-1 mb-1'>
+                      {tag.name}
+                    </Badge>
+                  ))}
                 </div>
               </div>
             ))}

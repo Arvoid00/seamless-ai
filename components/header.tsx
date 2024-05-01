@@ -67,13 +67,13 @@ export function Header() {
       </div>
       <div className='flex items-center'>
         <Button variant="link" asChild>
-          <Link href="/docs">Doc Manager</Link>
+          <Link href="/docs">Documents</Link>
         </Button>
         <Button variant="link" asChild>
-          <Link href="/tags">Tag Manager</Link>
+          <Link href="/tags">Tags</Link>
         </Button>
         <Button variant="link" asChild>
-          <Link href="/agents">Agent Manager</Link>
+          <Link href="/agents">Agents</Link>
         </Button>
         <CommandMenu />
       </div>

@@ -26,31 +26,27 @@ export async function getChats(userId?: string | null) {
 
 export async function getChatsByAgent(
   userId: string | null,
-  agentId: number | undefined
+  agentId: number | undefined | null
 ) {
   try {
     const supabase = createClient()
 
-    const agentPayload = agentId ? { id: agentId } : { id: null }
-    console.log('agentPayload', agentPayload)
-
-    const { data: chatsAgentContent } = await supabase
-      .from('chats')
-      .select('payload->agent->id')
-      .order('payload->createdAt', { ascending: false })
-      .eq('user_id', userId)
-      .eq('payload->agent->id', agentPayload)
-      .throwOnError()
-
-    console.log('chatsAgentContent', chatsAgentContent)
-
-    const { data: chats } = await supabase
+    let query = supabase
       .from('chats')
       .select('payload')
       .order('payload->createdAt', { ascending: false })
       .eq('user_id', userId)
-      // .eq('payload->agent->id', !agentId ? null : agentId)
-      .throwOnError()
+
+    if (agentId) {
+      // Filter chats where 'agent->id' matches the provided 'agentId'
+      query = query.filter('payload->agent->id', 'eq', agentId)
+    } else {
+      // Filter chats where 'agent' is either null or 'agent->id' does not exist
+      // This approach assumes 'agent' can be consistently null when not assigned
+      query = query.or('payload->agent.is.null,payload->agent->id.is.null')
+    }
+
+    const { data: chats } = await query.throwOnError()
 
     return (chats?.map(entry => entry.payload) as Chat[]) ?? []
   } catch (error) {
