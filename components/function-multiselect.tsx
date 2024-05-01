@@ -37,7 +37,7 @@ import { UseFormReturn } from "react-hook-form";
 // FIXME: https://twitter.com/lemcii/status/1659649371162419202?s=46&t=gqNnMIjMWXiG2Rbrr5gT6g
 // Removing states would help maybe?
 
-const ALL_FUNCTIONS = ["Web search", "Document Search"]
+const ALL_FUNCTIONS = ["Web search", "Document Search", "CCCCCCCCCCCCCCC", "DDDDDDDDDDDDD"]
 type Function = string
 
 export function FunctionMultiSelect({ currentItems, form }: { currentItems: Function[], form: UseFormReturn<AgentSchema> }) {
@@ -72,20 +72,20 @@ export function FunctionMultiSelect({ currentItems, form }: { currentItems: Func
                 <FormItem>
                     <FormLabel>Functions</FormLabel>
                     <FormControl    >
-                        <div className="w-min">
+                        <div className="w-full">
                             <Popover open={openCombobox} onOpenChange={onComboboxOpenChange}>
                                 <PopoverTrigger asChild>
                                     <Button
                                         variant="outline"
                                         role="combobox"
                                         aria-expanded={openCombobox}
-                                        className="w-min max-w-[500px] justify-between text-foreground"
+                                        className="w-full justify-between text-foreground"
                                     >
                                         <span className="truncate">
                                             {selectedValues.length === 0 && "Select functions"}
                                             {selectedValues.length === 1 && selectedValues[0]}
                                             {selectedValues.length === 2 && selectedValues.join(", ")}
-                                            {selectedValues.length > 2 && `${selectedValues.length} labels selected`}
+                                            {selectedValues.length > 2 && `${selectedValues.length} functions selected`}
                                         </span>
                                         <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
                                     </Button>
