@@ -36,16 +36,16 @@ const TagSelector = ({ selectedTags, setSelectedTags, forFile, form }: { selecte
                 selected={selectedTags}
                 setSelected={setSelectedTags}
                 forFile={validatedForFile}
-                defaultOptions={[]}
+                defaultOptions={tags}
                 creatable
                 groupBy="group"
                 placeholder="Add tags..."
                 loadingIndicator={
-                    <p className="py-2 text-center text-lg leading-10 text-muted-foreground">loading...</p>
+                    <p className="py-2 text-center text-lg leading-10 text-muted-foreground">Loading...</p>
                 }
                 emptyIndicator={
                     <p className="w-full text-center text-lg leading-10 text-muted-foreground">
-                        no results found.
+                        No results found.
                     </p>
                 }
             />

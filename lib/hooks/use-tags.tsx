@@ -53,7 +53,7 @@ export function TagsProvider({ children }: { children: React.ReactNode }) {
             if (error) {
                 toast.error("Failed to fetch tags")
             }
-            const tags = data as SupabaseTag[]
+            const tags = data?.sort((a, b) => a - b) as SupabaseTag[]
             setTags(tags)
         }
         getTagsData()

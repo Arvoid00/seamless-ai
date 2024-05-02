@@ -9,6 +9,7 @@ export async function getTags() {
     const { data, error } = await supabase
         .from('tags')
         .select()
+        .order('name', { ascending: true })
     return { data, error }
 }
 
@@ -27,6 +28,7 @@ export async function getTagsByGroup(group: string) {
         .from('tags')
         .select()
         .eq('group', group)
+        .order('name', { ascending: true })
     return { data, error }
 }
 

@@ -9,6 +9,7 @@ export async function getAgents() {
     const { data, error } = await supabase
         .from('agents')
         .select()
+        .order('name', { ascending: true })
         .throwOnError()
     return { data, error }
 }
@@ -41,6 +42,7 @@ export async function getAgentsByGroup(group: string) {
         .from('agents')
         .select()
         .eq('group', group)
+        .order('name', { ascending: true })
         .throwOnError()
     return { data, error }
 }

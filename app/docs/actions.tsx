@@ -20,6 +20,7 @@ export async function getDocuments() {
     const { data, error } = await supabase
         .from('documents')
         .select()
+        .order('name', { ascending: true })
     return { data, error }
 }
 
