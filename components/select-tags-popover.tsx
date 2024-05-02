@@ -82,7 +82,7 @@ export function SelectTagsPopover({ children, className, open, setOpen, returnFo
                                     >
                                         <Check
                                             className={cn(
-                                                "mr-2 h-4 w-4",
+                                                "mr-2 size-4",
                                                 isActive ? "opacity-100" : "opacity-0"
                                             )}
                                         />

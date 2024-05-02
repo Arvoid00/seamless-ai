@@ -192,7 +192,7 @@ const TagDialog = ({ title, action, open, tag }: TagDialogProps) => {
                                                     {TAG_COLORS.map((color) => (
                                                         <SelectItem key={color} value={color}>
                                                             <div
-                                                                className="h-4 w-4 rounded-full"
+                                                                className="size-4 rounded-full"
                                                                 style={{ backgroundColor: color }}
                                                             />
                                                         </SelectItem>
