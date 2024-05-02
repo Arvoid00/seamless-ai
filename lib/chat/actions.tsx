@@ -79,9 +79,9 @@ async function submitUserMessage({ content, tags, agent }: { content: string, ta
 
   const aiState = getMutableAIState<typeof AI>()
 
-  console.log('User message:', content)
-  console.log('Tags:', tags)
-  console.log('Agent:', agent)
+  // console.log('User message:', content)
+  // console.log('Tags:', tags)
+  // console.log('Agent:', agent)
 
   aiState.update({
     ...aiState.get(),

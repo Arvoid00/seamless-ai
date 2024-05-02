@@ -82,8 +82,8 @@ export async function POST(req: Request, res: NextApiResponse) {
   // )
   // console.log(resultA)
 
-  console.log('Query:', sanitizedQuery)
-  console.log('Tags:', tags)
+  // console.log('Query:', sanitizedQuery)
+  // console.log('Tags:', tags)
 
   const embedding = await generateEmbedding(sanitizedQuery)
 

@@ -16,7 +16,7 @@ export function Stocks({ props: stocks }: { props: Stock[] }) {
   const [, setMessages] = useUIState<typeof AI>()
   const { submitUserMessage } = useActions()
   const { agent } = useAgent()
-  const { tags } = useTags()
+  const { selectedTags } = useTags()
 
   return (
     <div>
@@ -26,7 +26,7 @@ export function Stocks({ props: stocks }: { props: Stock[] }) {
             key={stock.symbol}
             className="flex cursor-pointer flex-row gap-2 rounded-lg bg-zinc-800 p-2 text-left hover:bg-zinc-700 sm:w-52"
             onClick={async () => {
-              const body = { content: `View ${stock.symbol}`, tags: agent?.tags ?? tags, agent: agent }
+              const body = { content: `View ${stock.symbol}`, tags: agent?.tags ?? selectedTags, agent: agent }
               const response = await submitUserMessage(body)
               setMessages(currentMessages => [...currentMessages, response])
             }}
