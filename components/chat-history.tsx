@@ -17,7 +17,6 @@ export async function ChatHistory({ userId, agentName }: ChatHistoryProps) {
 
   const { data: agent, error } = await getAgentByName(agentName)
   if (!agent || error) console.error('Agent not found')
-  // console.log("Agent", agent)
 
   return (
     <div className="flex flex-col h-full">

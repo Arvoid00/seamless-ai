@@ -94,7 +94,7 @@ export function ChatPanel({
       />
 
       <div className="mx-auto sm:max-w-2xl sm:px-4">
-        <p className='font-semibold p-1'>Render components</p>
+        {messages.length === 0 && <p className='font-semibold p-1'>Render components</p>}
         <div className="mb-4 grid grid-cols-2 gap-2 px-4 sm:px-0">
           {messages.length === 0 &&
             exampleMessages.map((example, index) => (
@@ -126,7 +126,7 @@ export function ChatPanel({
               </div>
             ))}
         </div>
-        {!agent && <p className='font-semibold p-1'>Use an agent</p>}
+        {messages.length === 0 && !agent && <p className='font-semibold p-1'>Use an agent</p>}
         <div className="mb-4 grid grid-cols-2 gap-2 px-4 sm:px-0">
           {messages.length === 0 && !agent &&
             agents.map((agent, index) => (
@@ -151,7 +151,7 @@ export function ChatPanel({
               </div>
             ))}
         </div>
-        <p className='font-semibold p-1'>Example questions</p>
+        {messages.length === 0 && <p className='font-semibold p-1'>Example questions</p>}
         <div className="mb-4 grid grid-cols-2 gap-2 px-4 sm:px-0">
           {messages.length === 0 &&
             exampleInputs.map((example, index) => (

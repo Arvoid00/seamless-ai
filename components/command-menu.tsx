@@ -186,7 +186,7 @@ export function CommandMenu() {
                                 <PopoverCommandItemContent title={!usedAgent ? 'Select tags' : 'You cannot select tags when an agent is active'} icon={<TargetIcon className="size-5 mr-2" />} />
                             </CommandItem>
                         </SelectTagsPopover>
-                        <SelectAgentPopover open={openAgentPopover} setOpen={setOpenAgentPopover} returnFocusRef={commandInputRef}>
+                        <SelectAgentPopover open={openAgentPopover} setOpen={setOpenAgentPopover} commandOpen={open} setCommandOpen={setOpen} returnFocusRef={commandInputRef}>
                             <CommandItem onSelect={() => setOpenAgentPopover(true)}>
                                 <RocketIcon className="size-5 mr-2" />
                                 Select Agent

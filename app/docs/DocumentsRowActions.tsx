@@ -48,7 +48,6 @@ export function DocumentsRowActions<TData>({
             const { error } = await deleteFileObject(fileName)
             if (error) throw error
             const { data } = await deleteDocument(doc.id!)
-            console.log(data)
             toast.success("File deleted!")
             router.refresh()
         } catch (error) {

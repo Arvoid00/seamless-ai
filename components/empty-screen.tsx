@@ -27,7 +27,7 @@ export function EmptyScreen() {
           Welcome to Seamless AI!
         </h1>
         <p className="leading-normal text-muted-foreground">
-          Ask me anything! Here are some examples to get you started:
+          Ask me anything! Below are some examples to get you started.
         </p>
         {/* <p className="leading-normal text-muted-foreground">
           This is an open source AI chatbot app template built with{' '}

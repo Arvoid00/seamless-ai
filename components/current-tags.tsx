@@ -6,9 +6,11 @@ import { useState } from 'react'
 import { Button } from './ui/button'
 import { useTags } from '@/lib/hooks/use-tags'
 import { BookmarkIcon } from '@radix-ui/react-icons'
+import { SelectAgentPopover } from './select-agent-popover'
 
 function CurrentTags() {
-    const [open, setOpen] = useState(false)
+    const [openTags, setOpenTags] = useState(false)
+    const [openAgent, setOpenAgent] = useState(false)
     const { selectedTags } = useTags()
 
     return (
@@ -29,9 +31,14 @@ function CurrentTags() {
                         )) : <span className='text-zinc-500'>Select tags to use document search</span>}
                     </div>
                 </div>
-                <SelectTagsPopover open={open} setOpen={setOpen}>
-                    <Button variant={"secondary"}>⚙️</Button>
-                </SelectTagsPopover>
+                <div className='space-x-2'>
+                    <SelectTagsPopover open={openTags} setOpen={setOpenTags}>
+                        <Button variant={"secondary"}>🏷️</Button>
+                    </SelectTagsPopover>
+                    <SelectAgentPopover open={openAgent} setOpen={setOpenAgent}>
+                        <Button variant={"secondary"}>🤖</Button>
+                    </SelectAgentPopover>
+                </div>
             </div>
         </div>
 

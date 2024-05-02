@@ -26,8 +26,6 @@ export async function generateMetadata({
 export default async function ChatPageNoAgent({ params }: ChatPageProps) {
   const user = await getUser()
   const missingKeys = await getMissingKeys()
-  console.log('ChatPage', params)
-
   const chatId = params.id
 
   if (!user && chatId) {

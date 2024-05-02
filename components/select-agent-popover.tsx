@@ -30,10 +30,11 @@ type SelectTagsPopoverProps = {
     open: boolean
     setOpen: (value: boolean) => void
     returnFocusRef?: React.RefObject<HTMLElement>
+    commandOpen?: boolean
+    setCommandOpen?: (value: boolean) => void
 }
 
-export function SelectAgentPopover({ children, className, open, setOpen, returnFocusRef }: SelectTagsPopoverProps) {
-    const inputRef = React.useRef<HTMLInputElement>(null);
+export function SelectAgentPopover({ children, className, open, setOpen, returnFocusRef, commandOpen, setCommandOpen }: SelectTagsPopoverProps) {
     const [agents, setAgents] = React.useState<SupabaseAgent[]>([])
     const { agent: usedAgent, setAgent } = useAgent()
     const { setSelectedTags } = useTags()
@@ -50,30 +51,15 @@ export function SelectAgentPopover({ children, className, open, setOpen, returnF
     }, [])
 
     const switchAgent = (agent: SupabaseAgent) => {
-        // const url = window.location.href
-
-        // if (usedAgent) {
-        //     const oldAgent = usedAgent?.name.toLowerCase()
-        //     const newUrl = url.replace(oldAgent, agent.name.toLowerCase())
-        //     window.history.replaceState(null, "", newUrl) // Update the URL to reflect the selected agent
-        // } else {
-        //     const newUrl = url + agent.name.toLowerCase()
-        //     window.history.replaceState(null, "", newUrl) // Update the URL to reflect the selected agent
-        // }
-
+        setOpen(false)
+        if (setCommandOpen) setCommandOpen(false)
         setAgent(agent)
         setSelectedTags([])
         router.push("/" + agent.name.toLowerCase())
-        inputRef?.current?.focus();
     };
 
     return (
-        <Popover open={open} onOpenChange={(newOpen) => {
-            setOpen(newOpen)
-            if (!newOpen) {
-                returnFocusRef?.current?.focus()
-            }
-        }}>
+        <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 {children ? children : <Button>⚙️</Button>}
             </PopoverTrigger>

@@ -77,7 +77,7 @@ export function ChatShareDialog({
                   return
                 }
 
-                if (!result || typeof result !== 'string') {
+                if (!result || typeof result.sharePath !== 'string') {
                   console.error('Unexpected result from shareChat:', result);
                   return;
                 }
