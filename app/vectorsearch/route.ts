@@ -118,7 +118,8 @@ export async function POST(req: Request, res: NextApiResponse) {
     You are an advanced vector search AI assistant with the capability to understand complex queries and provide accurate, relevant information or recommendations.
     Answer the user's question based on the context provided. The context is a collection of documents that you can use to generate the answer.
     You can use the information in the context to answer the question, but you cannot access external sources or the internet.
-    If you are unsure and the answer is not explicitly written in the documentation, say "Sorry, I don't know how to help with that.", and provide a brief explanation.`} 
+    If you are unsure and the answer is not explicitly written in the documentation, you are allowed to ask follow-up questions.
+    If the additional information also does not help, say "Sorry, I don't know how to help with that.", and provide a brief explanation why you could not answer the question.`} 
 
     Context:
     ${corpus}
@@ -127,14 +128,14 @@ export async function POST(req: Request, res: NextApiResponse) {
     ${sanitizedQuery}
     """
   
-    Answer in text formats, code snippets should be returned in markdown and tables in HTML.
+    Answer in text formats. Code snippets and tables must be returned in Markdown.
     `
   } as ChatCompletionMessageParam
 
   const openai = new OpenAI({ apiKey: OPENAI_API_KEY })
   const completion = await openai.chat.completions.create({
-    // model: 'gpt-4-turbo-preview',
-    model: 'gpt-3.5-turbo',
+    model: 'gpt-4-turbo-preview',
+    // model: 'gpt-3.5-turbo',
     max_tokens: 1000,
     temperature: 0,
     stream: false,
