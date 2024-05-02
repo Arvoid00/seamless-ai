@@ -22,7 +22,7 @@ type FileContents = {
   docs: Document[]
 }
 
-async function extractTextFromPDF(
+export async function extractTextFromPDF(
   url: string,
   fileName: string
 ): Promise<FileContents> {
@@ -46,7 +46,7 @@ type ChunkObject = {
   embedding: number[]
 }
 
-async function splitText(docs: Document[]) {
+export async function splitText(docs: Document[]) {
   console.log('Splitting text into chunks:', docs.length)
   const splitter = new RecursiveCharacterTextSplitter({
     chunkSize: 1000,
@@ -75,7 +75,7 @@ type FileDocument = {
   fileName: string
 }
 
-async function insertDocument({
+export async function insertDocument({
   name,
   pages,
   hash,
@@ -110,7 +110,7 @@ type DocumentSection = {
   fileName: string
 }
 
-async function insertDocumentSections({
+export async function insertDocumentSections({
   document_id,
   chunks,
   source,

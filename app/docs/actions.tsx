@@ -51,7 +51,7 @@ export async function uploadFileToSupabase(file: File) {
     const supabase = createClient()
     const { data: obj, error } = await supabase.storage
         .from('documents')
-        .upload(`/documents/${safeFileName}`, file, {
+        .upload(`/documents/${safeFileName + Date()}`, file, {
             upsert: false
         })
 
