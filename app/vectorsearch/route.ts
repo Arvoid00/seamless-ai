@@ -92,6 +92,7 @@ export async function POST(req: Request, res: NextApiResponse) {
       query_embedding: embedding,
       match_threshold: 0.0, //0.78,
       match_count: 5,
+      filter: {},
       tags: tags.map((tag: any) => tag.value)
       // min_content_length: 50
     })
