@@ -136,6 +136,12 @@ export async function retryOperation(
   try {
     return await operation()
   } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message.includes('The resource already exists')
+    )
+      throw error
+
     if (retries > 0) {
       console.log(
         `Retry in ${backoff}ms, ${retries} retries left. Error: ${error}`

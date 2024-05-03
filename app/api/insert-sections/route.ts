@@ -1,6 +1,6 @@
 // file: app/api/insert-sections/route.ts
 import { NextRequest } from 'next/server'
-import { insertDocumentSections } from '../embed/route'
+import { insertDocumentSections } from '@/lib/uploads/actions'
 import { retryOperation } from '@/lib/utils'
 
 export async function POST(req: NextRequest) {
@@ -24,8 +24,7 @@ export async function POST(req: NextRequest) {
     return new Response(
       JSON.stringify({
         success: false,
-        message: 'Failed to insert document sections',
-        error: errorMessage
+        message: 'Failed to insert document sections: ' + errorMessage
       }),
       {
         status: 500,

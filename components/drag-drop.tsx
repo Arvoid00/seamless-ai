@@ -21,11 +21,15 @@ import { toast } from "sonner";
 import TagSelector from "./tag-selector";
 import { getBytes, retryOperation, sleep } from "@/lib/utils";
 import { SupabaseTag } from "@/types/supabase";
-import { extractTextFromPDF, splitText, insertDocument, insertDocumentSections } from "@/app/api/embed/route";
 import { Progress } from "./ui/progress";
 
 export type SelectedTagsProps = {
     [key: string]: SupabaseTag[]
+}
+
+export type CustomError = {
+    success: boolean,
+    message: string
 }
 
 export default function DragAndDrop() {
@@ -34,6 +38,7 @@ export default function DragAndDrop() {
     const inputRef = useRef<any>(null);
     const [files, setFiles] = useState<File[]>([]);
     const [progress, setProgress] = useState<Map<string, number>>(new Map());
+    const [uploadErrors, setUploadErrors] = useState<Map<string, string>>(new Map());
     const [selectedTags, setSelectedTags] = useState<SelectedTagsProps>({});
     const router = useRouter();
     const {
@@ -41,36 +46,20 @@ export default function DragAndDrop() {
         formState: { errors, isSubmitting },
     } = useForm()
 
-    function handleChange(e: any) {
-        e.preventDefault();
-        let newFiles: FileList | null = null;
-
-        if ("dataTransfer" in e) {
-            newFiles = e.dataTransfer.files;
-        } else {
-            newFiles = e.target.files;
-        }
-
-        if (newFiles === null) return
-
-        for (let i = 0; i < newFiles.length; i++) {
-            // @ts-ignore
-            if (newFiles[i] != null) setFiles((prevState) => [...prevState, newFiles[i]]);
-            if (newFiles[i] != null) setSelectedTags({ ...selectedTags, [newFiles[i].name]: [] });
-        }
-    }
-
     const updateProgress = (fileName: string, value: number) => {
-        const newProgress = new Map(progress);
-        progress.set(fileName, value);
-        setProgress(newProgress);
+        setProgress(prev => new Map(prev.set(fileName, value)));
     };
+
+    const updateUploadErrors = (fileName: string, error: string) => {
+        setUploadErrors(prev => new Map(prev.set(fileName, error)));
+    }
 
     async function performFetch(url: string, options: object, errorMessage: string) {
         const response = await fetch(url, options);
         if (!response.ok) {
             const errorBody = await response.text();
-            throw new Error(`${errorMessage}: ${errorBody}`);
+            // throw new Error(`${errorMessage}: ${errorBody}`);
+            throw new Error(`${errorBody}`);
         }
         return response.json();
     }
@@ -81,81 +70,56 @@ export default function DragAndDrop() {
         try {
             const formData = new FormData();
             formData.append("file", file);
+            updateProgress(originalFileName, 10);
 
-            const uploadRes = await fetch('/api/upload', {
+            const { uploadResult } = await performFetch('/api/upload', {
                 method: 'POST',
                 body: formData
-            });
-            if (!uploadRes.ok) throw new Error('Failed to upload file');
-            const { uploadResult } = await uploadRes.json();
+            }, 'Failed to upload file');
             updateProgress(originalFileName, 20);
 
-            try {
-                const extractRes = await fetch('/api/extract-text', {
-                    method: 'POST',
-                    body: JSON.stringify(uploadResult)
-                });
-                if (!extractRes.ok) throw new Error('Failed to extract text');
-                const { data: { name, pages, hash, docs } } = await extractRes.json();
-                updateProgress(originalFileName, 40);
+            const { data: { name, pages, hash, docs } } = await performFetch('/api/extract-text', {
+                method: 'POST',
+                body: JSON.stringify(uploadResult)
+            }, 'Failed to extract text');
+            updateProgress(originalFileName, 40);
 
-                try {
-                    const splitRes = await fetch('/api/split-embed', {
-                        method: 'POST',
-                        body: JSON.stringify({ docs })
-                    });
-                    if (!splitRes.ok) throw new Error('Failed to split text');
-                    const { chunks } = await splitRes.json();
-                    updateProgress(originalFileName, 60);
+            const { chunks } = await performFetch('/api/split-embed', {
+                method: 'POST',
+                body: JSON.stringify({ docs })
+            }, 'Failed to split text');
+            updateProgress(originalFileName, 60);
 
-                    try {
-                        const docRes = await fetch('/api/insert-document', {
-                            method: 'POST',
-                            body: JSON.stringify({
-                                name,
-                                pages,
-                                hash,
-                                tags: selectedTags[originalFileName],
-                                publicUrl: uploadResult.publicUrl,
-                                fileName: uploadResult.fileName
-                            })
-                        });
-                        if (!docRes.ok) throw new Error('Failed to insert document');
-                        const { id } = await docRes.json();
-                        updateProgress(originalFileName, 80);
+            const { id } = await performFetch('/api/insert-document', {
+                method: 'POST',
+                body: JSON.stringify({
+                    name,
+                    pages,
+                    hash,
+                    tags: selectedTags[originalFileName],
+                    publicUrl: uploadResult.url,
+                    fileName: uploadResult.fileName
+                })
+            }, 'Failed to insert document');
+            updateProgress(originalFileName, 80);
 
-                        const sectionsRes = await fetch('/api/insert-sections', {
-                            method: 'POST',
-                            body: JSON.stringify({
-                                document_id: id,
-                                chunks,
-                                publicUrl: uploadResult.publicUrl,
-                                fileName: uploadResult.fileName
-                            })
-                        });
-                        if (!sectionsRes.ok) throw new Error('Failed to insert document sections');
-                        updateProgress(originalFileName, 100);
+            await performFetch('/api/insert-sections', {
+                method: 'POST',
+                body: JSON.stringify({
+                    document_id: id,
+                    chunks,
+                    publicUrl: uploadResult.url,
+                    fileName: uploadResult.fileName
+                })
+            }, 'Failed to insert document sections');
+            updateProgress(originalFileName, 100);
 
-                        toast.success(`${originalFileName} uploaded successfully`);
-                    } catch (error) {
-                        console.error(error);
-                        const errorMessage = error instanceof Error ? error.message : String(error);
-                        toast.error(`Error in document insertion: ${errorMessage}`);
-                    }
-                } catch (error) {
-                    console.error(error);
-                    const errorMessage = error instanceof Error ? error.message : String(error);
-                    toast.error(`Error in text splitting: ${errorMessage}`);
-                }
-            } catch (error) {
-                console.error(error);
-                const errorMessage = error instanceof Error ? error.message : String(error);
-                toast.error(`Error in text extraction: ${errorMessage}`);
-            }
+            toast.success(`${originalFileName} uploaded successfully`);
+
         } catch (error) {
-            console.error(error);
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            toast.error(`Error in file upload: ${errorMessage}`);
+            let customError = error as CustomError;
+            let customErrorMessage = JSON.parse(customError.message).message;
+            updateUploadErrors(originalFileName, customErrorMessage);
         }
     }
 
@@ -168,26 +132,47 @@ export default function DragAndDrop() {
         try {
             setProgress(new Map(files.map(file => [file.name, 0])));
 
+            let uploadableFiles = [...files];
             files.forEach(file => {
-                if (!(file instanceof File)) {
-                    throw new Error('Invalid file type');
+                if (!(file instanceof File && file.type === "application/pdf")) {
+                    updateUploadErrors(file.name, "Invalid file type. Must be a PDF file.");
+                    // remove the file from the list of files to upload
+                    uploadableFiles.splice(uploadableFiles.indexOf(file), 1);
                 }
             });
 
-            const uploadPromises = files.map(file => executeUploadProcedure(file));
-
+            const uploadPromises = uploadableFiles.map(file => executeUploadProcedure(file));
             await Promise.all(uploadPromises);
 
-            await sleep(1500)
-            setFiles([]);
-            setSelectedTags({});
-            setProgress(new Map());
-            setDrawerOpen(false);
-            router.refresh()
+            if (uploadErrors.size > 0) {
+                toast.error("Some files failed to upload, please check the errors and try again.")
+            } else {
+                toast.success("All files uploaded successfully")
+                await sleep(2000)
+                setFiles([]);
+                setSelectedTags({});
+                setProgress(new Map());
+                setUploadErrors(new Map());
+                setDrawerOpen(false);
+                router.refresh()
+            }
         } catch (error) {
             console.error(error)
-            const errorMessage = error instanceof Error ? error.message : String(error)
+            const errorMessage = error instanceof Error ? JSON.parse(error.message).message : String(error)
             toast.error(errorMessage)
+        }
+    }
+
+    function handleChange(e: any) {
+        e.preventDefault();
+
+        const newFiles = "dataTransfer" in e ? e.dataTransfer.files : e.target.files;
+        if (newFiles === null) return
+
+        for (const file of newFiles) {
+            if (file === null) return
+            setFiles((prevState) => [...prevState, file]);
+            setSelectedTags({ ...selectedTags, [file.name]: [] });
         }
     }
 
@@ -277,18 +262,17 @@ export default function DragAndDrop() {
 
                         <div className="flex flex-col p-3 w-[80%] space-y-2">
                             {files.map((file: any, idx: any) => (
-                                <div key={idx}>
-                                    <div className="flex flex-row space-x-5 justify-between border rounded-lg p-4 items-center">
-                                        <div className="flex flex-col justify-start text-start space-y-2 w-full">
-                                            <div className="flex">{file.name} <div className="text-sm ml-auto min-w-16 text-right">{getBytes(file.size)}</div></div>
-                                            <TagSelector selectedTags={selectedTags} setSelectedTags={setSelectedTags} forFile={file.name} />
-                                        </div>
-
-                                        <Button variant={"ghost"} onClick={() => removeFile(file.name, idx)}>
-                                            <Cross1Icon className="size-6 text-red-500 cursor-pointer" />
-                                        </Button>
+                                <div key={idx} className="flex flex-row space-x-5 justify-between border rounded-lg p-4 items-center">
+                                    <div className="flex flex-col justify-start text-start space-y-2 w-full">
+                                        <div className="flex">{file.name} <div className="text-sm ml-auto min-w-16 text-right">{getBytes(file.size)}</div></div>
+                                        <TagSelector selectedTags={selectedTags} setSelectedTags={setSelectedTags} forFile={file.name} />
+                                        {!!progress.get(file.name) && <Progress className="mt-2" value={progress.get(file.name) ?? 0} />}
+                                        {!!uploadErrors.get(file.name) && <div className="mt-2 text-red-500 font-semibold"> {uploadErrors.get(file.name)}</div>}
                                     </div>
-                                    {!!progress.get(file.name) && <Progress value={progress.get(file.name) ?? 0} />}
+
+                                    <Button variant={"ghost"} onClick={() => removeFile(file.name, idx)}>
+                                        <Cross1Icon className="size-6 text-red-500 cursor-pointer" />
+                                    </Button>
                                 </div>
                             ))}
                         </div>

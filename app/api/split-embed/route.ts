@@ -1,6 +1,6 @@
 // file: app/api/split-embed/route.ts
 import { NextRequest } from 'next/server'
-import { splitText } from '../embed/route'
+import { splitText } from '@/lib/uploads/actions'
 import { retryOperation } from '@/lib/utils'
 
 export async function POST(req: NextRequest) {
@@ -17,8 +17,7 @@ export async function POST(req: NextRequest) {
     return new Response(
       JSON.stringify({
         success: false,
-        message: 'Failed to split and embed text',
-        error: errorMessage
+        message: 'Failed to split and embed text : ' + errorMessage
       }),
       {
         status: 500,

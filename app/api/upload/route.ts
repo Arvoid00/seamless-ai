@@ -1,21 +1,23 @@
 // file: app/api/upload/route.ts
-import { uploadFileToSupabase } from '@/app/docs/actions'
+import {
+  uploadFileToSupabase
+  // uploadResumableFileToSupabase
+} from '@/app/docs/actions'
 import { retryOperation } from '@/lib/utils'
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
-  // const files: File[] = (await req.formData()).getAll('file') as File[]
   const file = (await req.formData()).get('file') as File
 
   try {
     const { fileName, publicUrl } = await retryOperation(() =>
-      uploadFileToSupabase(file)
+      uploadFileToSupabase(file, 'documents')
     )
-    return new Response(
-      JSON.stringify({
+    return NextResponse.json(
+      {
         success: true,
         uploadResult: { fileName, url: publicUrl }
-      }),
+      },
       {
         status: 200,
         headers: {
@@ -25,12 +27,11 @@ export async function POST(req: NextRequest) {
     )
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
-    return new Response(
-      JSON.stringify({
+    return NextResponse.json(
+      {
         success: false,
-        message: 'Failed to upload file',
-        error: errorMessage
-      }),
+        message: errorMessage
+      },
       {
         status: 500,
         headers: {

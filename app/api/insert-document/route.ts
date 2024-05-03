@@ -1,13 +1,15 @@
 // file: app/api/insert-document/route.ts
 import { retryOperation } from '@/lib/utils'
 import { NextRequest } from 'next/server'
-import { insertDocument } from '../embed/route'
+import { insertDocument } from '@/lib/uploads/actions'
 
 export async function POST(req: NextRequest) {
-  const document = await req.json()
+  const { name, pages, hash, tags, publicUrl, fileName } = await req.json()
 
   try {
-    const { id } = await retryOperation(() => insertDocument(document))
+    const { id } = await retryOperation(() =>
+      insertDocument({ name, pages, hash, tags, publicUrl, fileName })
+    )
     return new Response(JSON.stringify({ success: true, id: id }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
@@ -17,8 +19,7 @@ export async function POST(req: NextRequest) {
     return new Response(
       JSON.stringify({
         success: false,
-        message: 'Failed to insert document',
-        error: errorMessage
+        message: 'Failed to insert document: ' + errorMessage
       }),
       {
         status: 500,

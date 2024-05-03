@@ -1,7 +1,7 @@
 // file: app/api/extract-text/route.ts
 import { retryOperation } from '@/lib/utils'
 import { NextRequest } from 'next/server'
-import { extractTextFromPDF } from '../embed/route'
+import { extractTextFromPDF } from '@/lib/uploads/actions'
 
 export async function POST(req: NextRequest) {
   const { url, fileName } = await req.json()
@@ -22,8 +22,7 @@ export async function POST(req: NextRequest) {
     return new Response(
       JSON.stringify({
         success: false,
-        message: 'Failed to extract text',
-        error: errorMessage
+        message: 'Failed to extract text: ' + errorMessage
       }),
       {
         status: 500,
