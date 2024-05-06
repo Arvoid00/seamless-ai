@@ -8,6 +8,9 @@ export type DocumentSection =
 export type SupabaseDocument = Database['public']['Tables']['documents']['Row']
 export type SupabaseTag = Database['public']['Tables']['tags']['Row']
 export type SupabaseAgent = Database['public']['Tables']['agents']['Row']
+export type SupabaseProfile = Database['public']['Tables']['profiles']['Row']
+export type SupabaseOrganization =
+  Database['public']['Tables']['organizations']['Row']
 
 export type Json =
   | string
@@ -22,7 +25,6 @@ export type Database = {
     Tables: {
       agents: {
         Row: {
-          tags: Json | null
           created_at: string
           description: string | null
           functions: Json | null
@@ -30,10 +32,10 @@ export type Database = {
           model: string | null
           name: string
           prompt: string | null
+          tags: Json | null
           temperature: number | null
         }
         Insert: {
-          tags?: Json | null
           created_at?: string
           description?: string | null
           functions?: Json | null
@@ -41,10 +43,10 @@ export type Database = {
           model?: string | null
           name: string
           prompt?: string | null
+          tags?: Json | null
           temperature?: number | null
         }
         Update: {
-          tags?: Json | null
           created_at?: string
           description?: string | null
           functions?: Json | null
@@ -52,6 +54,7 @@ export type Database = {
           model?: string | null
           name?: string
           prompt?: string | null
+          tags?: Json | null
           temperature?: number | null
         }
         Relationships: []
@@ -174,6 +177,75 @@ export type Database = {
         }
         Relationships: []
       }
+      organizations: {
+        Row: {
+          created_at: string
+          id: number
+          is_active: boolean
+          name: string
+          text_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          is_active?: boolean
+          name: string
+          text_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          is_active?: boolean
+          name?: string
+          text_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          is_active: boolean
+          name: string | null
+          organization_id: number | null
+          settings: Json | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id: string
+          is_active?: boolean
+          name?: string | null
+          organization_id?: number | null
+          settings?: Json | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string | null
+          organization_id?: number | null
+          settings?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'profiles_id_fkey'
+            columns: ['id']
+            isOneToOne: true
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'profiles_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       tags: {
         Row: {
           color: string
@@ -206,32 +278,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      match_documents:
-        | {
-            Args: {
-              query_embedding: string
-              match_count?: number
-              filter?: Json
-            }
-            Returns: {
-              id: number
-              content: string
-              metadata: Json
-              similarity: number
-            }[]
-          }
-        | {
-            Args: {
-              query_embedding: string
-              match_threshold: number
-              match_count: number
-            }
-            Returns: {
-              id: number
-              content: string
-              similarity: number
-            }[]
-          }
       match_documents_new: {
         Args: {
           query_embedding: string
