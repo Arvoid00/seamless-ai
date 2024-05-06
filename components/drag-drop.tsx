@@ -146,6 +146,9 @@ export default function DragAndDrop() {
 
             if (uploadErrors.size > 0) {
                 toast.error("Some files failed to upload, please check the errors and try again.")
+                // set files to only the files that failed to upload
+                setFiles(files.filter(file => uploadErrors.has(file.name)));
+                router.refresh()
             } else {
                 toast.success("All files uploaded successfully")
                 await sleep(2000)
@@ -246,7 +249,8 @@ export default function DragAndDrop() {
                             type="file"
                             multiple={true}
                             onChange={handleChange}
-                            accept=".xlsx,.xls,image/*,.doc, .docx,.ppt, .pptx,.txt,.pdf"
+                            // accept=".xlsx,.xls,image/*,.doc, .docx,.ppt, .pptx,.txt,.pdf"
+                            accept=".pdf"
                         />
 
                         <p>
