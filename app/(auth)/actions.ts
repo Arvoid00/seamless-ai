@@ -59,3 +59,20 @@ export async function getUser() {
   } = await supabase.auth.getUser()
   return user
 }
+
+export async function getUserProfileWithOrg() {
+  const supabase = createClient()
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser()
+  if (!user) return null
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*, organizations(*)')
+    .eq('id', user?.id)
+    .single()
+    .throwOnError()
+  return data
+}

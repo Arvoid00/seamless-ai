@@ -13,7 +13,7 @@ import { UserMenu } from '@/components/user-menu'
 import { SidebarMobile } from './sidebar-mobile'
 import { SidebarToggle } from './sidebar-toggle'
 import { ChatHistory } from './chat-history'
-import { getUser } from '@/app/(auth)/actions'
+import { getUser, getUserProfileWithOrg } from '@/app/(auth)/actions'
 import { CommandMenu } from './command-menu'
 import {
   Tooltip,
@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/tooltip'
 
 async function UserOrLogin() {
-  const user = await getUser()
+  const user = await getUserProfileWithOrg()
   return (
     <>
       {user ? (

@@ -10,6 +10,7 @@ import { User } from '@supabase/supabase-js'
 import { signout } from '@/app/(auth)/actions'
 
 export interface UserMenuProps {
+  // user: User & {organizations: SupabaseOrganization}
   user: User
 }
 
@@ -33,6 +34,10 @@ export function UserMenu({ user }: UserMenuProps) {
         <DropdownMenuContent sideOffset={8} align="start" className="w-fit">
           <DropdownMenuItem className="flex-col items-start">
             <div className="text-xs text-zinc-500">{user.email}</div>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem className="flex-col items-start">
+            <div className="text-xs text-zinc-500">{user.organizations.name}</div>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <form
