@@ -8,10 +8,10 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { User } from '@supabase/supabase-js'
 import { signout } from '@/app/(auth)/actions'
+import { SupabaseOrganization } from '@/types/supabase'
 
 export interface UserMenuProps {
-  // user: User & {organizations: SupabaseOrganization}
-  user: User
+  user: User & { organizations: SupabaseOrganization }
 }
 
 function getUserInitials(name: string) {
