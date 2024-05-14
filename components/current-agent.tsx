@@ -30,7 +30,7 @@ function CurrentAgent() {
                     ))}
                 </div>
                 <SelectAgentPopover open={open} setOpen={setOpen}>
-                    <Button variant={"secondary"}>⚙️</Button>
+                    <Button variant={"secondary"}>🤖</Button>
                 </SelectAgentPopover>
             </div>
         </div>

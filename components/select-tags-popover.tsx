@@ -52,7 +52,7 @@ export function SelectTagsPopover({ children, className, open, setOpen, returnFo
             }
         }}>
             <PopoverTrigger asChild>
-                {children ? children : <Button>⚙️</Button>}
+                {children ? children : <Button>🏷️</Button>}
             </PopoverTrigger>
             <PopoverContent className="p-0" side="right" align="start">
                 <Command>

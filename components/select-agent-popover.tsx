@@ -61,7 +61,7 @@ export function SelectAgentPopover({ children, className, open, setOpen, returnF
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                {children ? children : <Button>⚙️</Button>}
+                {children ? children : <Button>🤖</Button>}
             </PopoverTrigger>
             <PopoverContent className="p-0" side="right" align="start">
                 <Command>
