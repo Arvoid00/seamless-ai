@@ -204,7 +204,8 @@ const AgentDialog = ({ title, action, open, agent }: AgentDialogProps) => {
                                                     </FormControl>
                                                     <SelectContent>
                                                         <SelectItem value="gpt-3.5-turbo">GPT 3.5 Turbo</SelectItem>
-                                                        <SelectItem value="gpt-4-turbo-preview">GPT 4 Turbo Preview</SelectItem>
+                                                        <SelectItem value="gpt-4-turbo">GPT 4 Turbo</SelectItem>
+                                                        <SelectItem value="gpt-4-o">GPT 4o</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                                 <FormMessage />

@@ -32,12 +32,20 @@ import {
   nanoid
 } from '@/lib/utils'
 import { saveChat } from '@/app/actions'
-import { SpinnerMessage, UserMessage, VectorMessage } from '@/components/stocks/message'
+import { LangGraphMessage, MultiAgentMessage, SpinnerMessage, UserMessage, VectorMessage } from '@/components/stocks/message'
 import { Chat } from '@/types/types'
 import { getUser } from '@/app/(auth)/actions'
 import { confirmPurchase, vectorSearch } from './ui-functions'
 import { PageSection, VectorResponse } from '@/app/vectorsearch/route'
 import { SupabaseAgent, SupabaseTag } from '../../types/supabase'
+
+import { ChatOpenAI } from "@langchain/openai";
+import { HumanMessage, BaseMessage } from "@langchain/core/messages";
+import { END, MessageGraph } from "@langchain/langgraph";
+import { ToolMessage } from "@langchain/core/messages";
+import { Calculator } from "@langchain/community/tools/calculator";
+import { convertToOpenAITool } from "@langchain/core/utils/function_calling";
+import { multiAgentFunction } from './multi-agent'
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || ''
 const openai = new OpenAI({
@@ -74,6 +82,62 @@ async function getVectorResult(query: string, tags: SupabaseTag[]) {
   return vectorResponse
 }
 
+async function useLangGraphModel({ content, tags, agent }: { content: string, tags: SupabaseTag[], agent: SupabaseAgent }) {
+
+  const model = new ChatOpenAI({
+    temperature: 0,
+  }).bind({
+    tools: [convertToOpenAITool(new Calculator())],
+    tool_choice: "auto",
+  });
+
+  const graph = new MessageGraph();
+
+  graph.addNode("oracle", async (state: BaseMessage[]) => {
+    return model.invoke(state);
+  });
+
+  graph.addNode("calculator", async (state: BaseMessage[]) => {
+    const tool = new Calculator();
+    const toolCalls = state[state.length - 1].additional_kwargs.tool_calls ?? [];
+    const calculatorCall = toolCalls.find(
+      (toolCall) => toolCall.function.name === "calculator"
+    );
+    if (calculatorCall === undefined) {
+      throw new Error("No calculator input found.");
+    }
+    const result = await tool.invoke(
+      JSON.parse(calculatorCall.function.arguments)
+    );
+    return new ToolMessage({
+      tool_call_id: calculatorCall.id,
+      content: result,
+    });
+  });
+
+  graph.addEdge("calculator", END);
+  graph.setEntryPoint("oracle");
+
+  const router = (state: BaseMessage[]) => {
+    const toolCalls = state[state.length - 1].additional_kwargs.tool_calls ?? [];
+    if (toolCalls.length) {
+      return "calculator";
+    } else {
+      return "end";
+    }
+  };
+
+  graph.addConditionalEdges("oracle", router, {
+    calculator: "calculator",
+    end: END,
+  });
+
+  const runnable = graph.compile();
+
+  const res = await runnable.invoke(new HumanMessage(content ?? "What is 1 + 1?"));
+  return res;
+}
+
 async function submitUserMessage({ content, tags, agent }: { content: string, tags: SupabaseTag[], agent: SupabaseAgent }) {
   'use server'
 
@@ -100,7 +164,7 @@ async function submitUserMessage({ content, tags, agent }: { content: string, ta
   let textNode: undefined | React.ReactNode
 
   const ui = render({
-    model: 'gpt-4-turbo-preview',
+    model: 'gpt-4-turbo',
     provider: openai,
     initial: <SpinnerMessage />,
     messages: [
@@ -116,6 +180,7 @@ Messages inside [] means that it's a UI element or a user event. For example:
 - "[Price of AAPL = 100]" means that an interface of the stock price of AAPL is shown to the user.
 - "[User has changed the amount of AAPL to 10]" means that the user has changed the amount of AAPL to 10 in the UI.
 
+If the user does something that looks like a web search. call \`multiagent\` to answer the user question.
 If the user requests purchasing a stock, call \`show_stock_purchase_ui\` to show the purchase UI.
 If the user just wants the price, call \`show_stock_price\` to show the price.
 If you want to show trending stocks, call \`list_stocks\`.
@@ -157,6 +222,87 @@ Besides that, you can also chat with users and do some calculations if needed.`
       return textNode
     },
     functions: {
+      langGraph: {
+        description:
+          'Use langgraph to answer the user question. Use this function to answer user questions based on the user query.',
+        parameters: z.object({
+          query: z.string().describe('The query to use in langgraph.'),
+        }),
+        render: async function* ({ query }) {
+          yield (
+            <BotCard>
+              <SpinnerMessage message={`Initializing Langgraph for query: '${query}' `} />
+            </BotCard>
+          )
+
+          const data = await useLangGraphModel({ content: query, tags, agent })
+
+          aiState.done({
+            ...aiState.get(),
+            messages: [
+              ...aiState.get().messages,
+              {
+                id: nanoid(),
+                role: 'function',
+                name: 'langgraph',
+                content: JSON.stringify({ data }),
+                tags: tags
+              }
+            ]
+          })
+
+          return (
+            <BotCard>
+              <LangGraphMessage data={data} tags={tags} agent={agent} />
+            </BotCard>
+          )
+        }
+      },
+      multiagent: {
+        description:
+          'Use multiagent to answer the user question. Use this function to answer user questions based on the user query.',
+        parameters: z.object({
+          query: z.string().describe('The query to use in multiagent.'),
+        }),
+        render: async function* ({ query }) {
+          yield (
+            <BotCard>
+              <SpinnerMessage message={`Initializing Multiagent for query: '${query}' `} />
+            </BotCard>
+          )
+
+          const streamResults = multiAgentFunction({ content: query, tags, agent })
+          for await (const chunk of streamResults) {
+            yield (
+              <BotCard>
+                <BotMessage content={chunk} />
+              </BotCard>
+            )
+          }
+
+          // const data = await multiAgentFunction({ content: query, tags, agent })
+
+          aiState.done({
+            ...aiState.get(),
+            messages: [
+              ...aiState.get().messages,
+              {
+                id: nanoid(),
+                role: 'function',
+                name: 'multiagent',
+                content: JSON.stringify({ streamResults }),
+                tags: tags
+              }
+            ]
+          })
+
+          return (
+            <BotCard>
+              <MultiAgentMessage data={streamResults} tags={tags} agent={agent} />
+            </BotCard>
+          )
+        }
+      },
       vecSearch: {
         description:
           'Do a vector search. Search for a vector or document based on user input. Use this function to search for information based on the user query.',
@@ -486,7 +632,15 @@ export const getUIStateFromAIState = (aiState: Chat) => {
             <BotCard>
               <VectorMessage data={JSON.parse(message.content).data} usage={JSON.parse(message.content).usage} sections={message.sections} tags={message.tags} agent={aiState.agent} />
             </BotCard>
-          ) : null
+          ) : message.name === 'langgraph' ? (
+            <BotCard>
+              <LangGraphMessage data={JSON.parse(message.content).data} tags={message.tags} agent={aiState.agent} />
+            </BotCard>
+          ) : message.name === 'multiagent' ? (
+            <BotCard>
+              <MultiAgentMessage data={JSON.parse(message.content).data} tags={message.tags} agent={aiState.agent} />
+            </BotCard>
+          ) : `No specific Component found for function '${message.name}'`
         ) : message.role === 'user' ? (
           <UserMessage>{message.content}</UserMessage>
         ) : (
