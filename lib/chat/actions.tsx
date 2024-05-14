@@ -32,7 +32,10 @@ import {
   nanoid
 } from '@/lib/utils'
 import { saveChat } from '@/app/actions'
-import { LangGraphMessage, MultiAgentMessage, SpinnerMessage, UserMessage, VectorMessage } from '@/components/stocks/message'
+import { SpinnerMessage, UserMessage } from '@/components/stocks/message'
+import { LangGraphMessage } from '@/components/chat-message-types/langgraph-message'
+import { MultiAgentMessage } from '@/components/chat-message-types/multi-agent-message'
+import { VectorMessage } from '@/components/chat-message-types/vector-message'
 import { Chat } from '@/types/types'
 import { getUser } from '@/app/(auth)/actions'
 import { confirmPurchase, vectorSearch } from './ui-functions'
