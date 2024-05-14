@@ -160,6 +160,9 @@ const buildSystemPrompt = (agent: SupabaseAgent) => {
   Messages inside [] means that it's a UI element or a user event. For example:
   - "[Price of AAPL = 100]" means that an interface of the stock price of AAPL is shown to the user.
   - "[User has changed the amount of AAPL to 10]" means that the user has changed the amount of AAPL to 10 in the UI.
+
+  If the query contains something in the form of a document search or vector search, call \`vecSearch\` to answer the user question.
+  If the query contains something in the form of a multiagent or web search, call \`multiagent\` to answer the user question.
   
   If you are unsure about what to do, you can ask the user for more information or ask the user to clarify their request.
   
