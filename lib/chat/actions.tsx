@@ -141,6 +141,33 @@ async function useLangGraphModel({ content, tags, agent }: { content: string, ta
   return res;
 }
 
+const buildSystemPrompt = (agent: SupabaseAgent) => {
+
+  let prompt = ""
+  prompt += agent.prompt || '';
+  // @ts-expect-error Type 'Json | undefined' is not an array type.
+  agent.functions?.forEach(func => {
+    if (func.includes("Document Search")) {
+      prompt += "You are also a document search engine. You are allowed to search through documents based on user input. If the user requests a document search, vector search, vec search, or vc, call 'vec_search' to comply with the request.\n"
+    }
+    if (func.includes("Web Search")) {
+      prompt += "You are also a web search engine. You are allowed to search through the web based on user input. If the user does something that looks like a web search or chart creation. call `multiagent` to answer the user question.\n"
+    }
+  })
+
+  prompt += `If the user asks you to do a math calculation, call \`langgraph\` to answer the user question.
+    
+  Messages inside [] means that it's a UI element or a user event. For example:
+  - "[Price of AAPL = 100]" means that an interface of the stock price of AAPL is shown to the user.
+  - "[User has changed the amount of AAPL to 10]" means that the user has changed the amount of AAPL to 10 in the UI.
+  
+  If you are unsure about what to do, you can ask the user for more information or ask the user to clarify their request.
+  
+  Besides that, you can also chat with users.`
+
+  return prompt
+}
+
 async function submitUserMessage({ content, tags, agent }: { content: string, tags: SupabaseTag[], agent: SupabaseAgent }) {
   'use server'
 
@@ -173,25 +200,7 @@ async function submitUserMessage({ content, tags, agent }: { content: string, ta
     messages: [
       {
         role: 'system',
-        // content: agent.prompt, // TODO: Customize agent prompt based on agent and encapsulate other functionalities 
-        content: `\
-You are a stock trading conversation bot and you can help users buy stocks, step by step.
-You and the user can discuss stock prices and the user can adjust the amount of stocks they want to buy, or place an order, in the UI.
-You are also a document search engine. You can search for vectors or documents based on user input.
-
-Messages inside [] means that it's a UI element or a user event. For example:
-- "[Price of AAPL = 100]" means that an interface of the stock price of AAPL is shown to the user.
-- "[User has changed the amount of AAPL to 10]" means that the user has changed the amount of AAPL to 10 in the UI.
-
-If the user does something that looks like a web search. call \`multiagent\` to answer the user question.
-If the user requests purchasing a stock, call \`show_stock_purchase_ui\` to show the purchase UI.
-If the user just wants the price, call \`show_stock_price\` to show the price.
-If you want to show trending stocks, call \`list_stocks\`.
-If you want to show events, call \`get_events\`.
-If the user requests a vector search, vec search, vc, or document search, call \'vec_search\' to comply with the request.
-If the user wants to sell stock, or complete another impossible task, respond that you are a demo and cannot do that.
-
-Besides that, you can also chat with users and do some calculations if needed.`
+        content: buildSystemPrompt(agent)
       },
       ...aiState.get().messages.map((message: any) => ({
         role: message.role,
