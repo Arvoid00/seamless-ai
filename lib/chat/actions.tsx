@@ -141,12 +141,12 @@ async function useLangGraphModel({ content, tags, agent }: { content: string, ta
   return res;
 }
 
-const buildSystemPrompt = (agent: SupabaseAgent) => {
+const buildSystemPrompt = (agent: SupabaseAgent | undefined) => {
 
   let prompt = ""
-  prompt += agent.prompt || '';
+  prompt += agent?.prompt || '';
   // @ts-expect-error Type 'Json | undefined' is not an array type.
-  agent.functions?.forEach(func => {
+  agent?.functions?.forEach(func => {
     if (func.includes("Document Search")) {
       prompt += "You are also a document search engine. You are allowed to search through documents based on user input. If the user requests a document search, vector search, vec search, or vc, call 'vec_search' to comply with the request.\n"
     }
