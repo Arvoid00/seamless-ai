@@ -135,8 +135,7 @@ export async function POST(req: Request, res: NextApiResponse) {
 
   const openai = new OpenAI({ apiKey: OPENAI_API_KEY })
   const completion = await openai.chat.completions.create({
-    model: 'gpt-4-turbo-preview',
-    // model: 'gpt-3.5-turbo',
+    model: 'gpt-3.5-turbo',
     max_tokens: 1000,
     temperature: 0,
     stream: false,
