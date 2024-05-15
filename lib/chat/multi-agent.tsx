@@ -145,7 +145,7 @@ export const multiAgentFunction = async function* ({ content, tags, agent }: { c
         };
     }
 
-    const llm = new ChatOpenAI({ modelName: "gpt-4-turbo" });
+    const llm = new ChatOpenAI({ modelName: "gpt-3.5-turbo" });
 
     // Research agent and node
     const researchAgent = await createAgent({
