@@ -285,15 +285,40 @@ async function submitUserMessage({ content, tags, agent }: { content: string, ta
               <SpinnerMessage message={`Initializing Multiagent for query: '${query}' `} />
             </BotCard>
           )
+          // const systemMessage = createStreamableUI(null)
+
+          // const multiagent = createStreamableUI(
+          //   <div className="inline-flex items-start gap-1 md:items-center">
+          //     {spinner}
+          //     <p className="mb-2">
+          //       Initializing Multiagent for query {query}...
+          //     </p>
+          //   </div>
+          // )
 
           const streamResults = multiAgentFunction({ content: query, tags, agent })
-          for await (const chunk of streamResults) {
-            yield (
-              <BotCard>
-                <BotMessage content={chunk} />
-              </BotCard>
-            )
-          }
+          // for await (const chunk of streamResults) {
+          //   multiagent.update(
+          //     <div className="inline-flex items-start gap-1 md:items-center">
+          //       {spinner}
+          //       <p className="mb-2">
+          //         {chunk}
+          //       </p>
+          //     </div>
+          //   )
+          // }
+
+          // multiagent.done(
+          //   <BotCard>
+          //     <MultiAgentMessage data={streamResults} tags={tags} agent={agent} />
+          //   </BotCard>
+          // )
+
+          // systemMessage.done(
+          //   <SystemMessage>
+          //     Multiagent executed for {query}!
+          //   </SystemMessage>
+          // )
 
           // const data = await multiAgentFunction({ content: query, tags, agent })
 

@@ -25,8 +25,11 @@ import { ToolExecutor } from "@langchain/langgraph/prebuilt";
 import { ToolMessage } from "@langchain/core/messages";
 import { END, StateGraph } from "@langchain/langgraph";
 import { SupabaseAgent, SupabaseTag } from "@/types/supabase";
+import { createStreamableValue } from "ai/rsc";
 
 // CREATE AGENT
+
+const MAX_RECURSION = 100;
 
 async function createAgent({
     llm,
@@ -319,7 +322,7 @@ export const multiAgentFunction = async function* ({ content, tags, agent }: { c
                 }),
             ],
         },
-        { recursionLimit: 150 }
+        { recursionLimit: MAX_RECURSION }
     );
 
 
@@ -334,7 +337,7 @@ export const multiAgentFunction = async function* ({ content, tags, agent }: { c
     }
 
 
-    console.log("streamOutputs", processStreamResults())
+    console.log("streamOutputs", streamOutputs)
     console.log("globalChartOptions", globalChartOptions)
 
     return { streamOutputs: streamOutputs, globalChartOptions: globalChartOptions };

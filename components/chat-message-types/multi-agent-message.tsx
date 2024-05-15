@@ -26,6 +26,7 @@ import {
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { cn } from "@/lib/utils"
+import { useStreamableText } from "@/lib/hooks/use-streamable-text"
 
 export function MultiAgentMessage({
     data,
@@ -43,7 +44,7 @@ export function MultiAgentMessage({
     // const answer = `Answer: ${data[2].kwargs.content}`
 
     {
-        data.globalChartOptions && ChartJS.register(
+        data?.globalChartOptions && ChartJS.register(
             CategoryScale,
             LinearScale,
             BarElement,
@@ -59,7 +60,8 @@ export function MultiAgentMessage({
         call_tool: "🛠️",
     };
 
-    // const text = useStreamableText(data)
+    // const streamedData = useStreamableText(data)
+    // const streamedObject = JSON.parse(streamedData)
 
     return (
         <div className={cn('group relative flex items-start md:-ml-12', className)}>
@@ -83,7 +85,7 @@ export function MultiAgentMessage({
                         </div>
                         {/* <MarkdownWrapper text={text} /> */}
 
-                        {data.streamOutputs.filter(step => Object.keys(step)[0] != "call_tool" && Object.keys(step)[0] != "__end__").map((step, index) => {
+                        {data?.streamOutputs.filter(step => Object.keys(step)[0] != "call_tool" && Object.keys(step)[0] != "__end__").map((step, index) => {
                             const stepKey = Object.keys(step)[0];
                             const stepData = step[stepKey];
 
@@ -105,7 +107,7 @@ export function MultiAgentMessage({
                             );
                         })}
 
-                        {data.globalChartOptions && <Bar data={data.globalChartOptions.chartData} options={data.globalChartOptions.options} />}
+                        {data?.globalChartOptions && <Bar data={data.globalChartOptions.chartData} options={data.globalChartOptions.options} />}
 
                         <AccordionContent>
                             {/* @ts-expect-error Type 'Json | undefined' is not an array type. ts(2461) */}
