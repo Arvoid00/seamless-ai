@@ -49,7 +49,7 @@ export function LangGraphMessage({
                             <div className='flex justify-between'>
                                 <div>Langgraph Results:</div>
                                 <Tooltip>
-                                    <TooltipTrigger><AccordionTrigger className='hover:no-underline py-2'>💡</AccordionTrigger></TooltipTrigger>
+                                    <TooltipTrigger asChild><AccordionTrigger className='hover:no-underline py-2'>💡</AccordionTrigger></TooltipTrigger>
                                     <TooltipContent>
                                         <p>Show sources</p>
                                     </TooltipContent>

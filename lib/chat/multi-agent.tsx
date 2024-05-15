@@ -26,6 +26,7 @@ import { ToolMessage } from "@langchain/core/messages";
 import { END, StateGraph } from "@langchain/langgraph";
 import { SupabaseAgent, SupabaseTag } from "@/types/supabase";
 import { createStreamableValue } from "ai/rsc";
+import { convertToPlainObject } from "../utils";
 
 // CREATE AGENT
 
@@ -66,12 +67,12 @@ async function createAgent({
 
 const isToolMessage = (message) => !!message?.additional_kwargs?.tool_calls;
 
-type globalChartOptionsType = {
+export type GlobalChartOptionsType = {
     chartData?: any,
     options?: any
 }
 
-let globalChartOptions: globalChartOptionsType = { chartData: {}, options: {} };
+let globalChartOptions: GlobalChartOptionsType = { chartData: {}, options: {} };
 
 // GENERATE CHART
 
@@ -121,14 +122,14 @@ const chartTool = new DynamicStructuredTool({
         };
         console.log("chartData", chartData);
         globalChartOptions = { chartData, options }
-        return "Chart has been generated and displayed to the user!";
+        return "Chart data has been parsed and passed to response object.";
 
     },
 });
 
-const tavilyTool = new TavilySearchResults();
+const tavilyTool = new TavilySearchResults({ maxResults: 3 });
 
-export const multiAgentFunction = async function* ({ content, tags, agent }: { content: string, tags: SupabaseTag[], agent: SupabaseAgent }) {
+export async function* multiAgentFunction({ content, tags, agent }: { content: string, tags: SupabaseTag[], agent: SupabaseAgent }) {
     console.log("multi-agent function");
 
     // AGENT DEFINITION
@@ -148,14 +149,14 @@ export const multiAgentFunction = async function* ({ content, tags, agent }: { c
         };
     }
 
-    const llm = new ChatOpenAI({ modelName: "gpt-3.5-turbo" });
+    const llm = new ChatOpenAI({ modelName: "gpt-4o" });
 
     // Research agent and node
     const researchAgent = await createAgent({
         llm,
         tools: [tavilyTool],
         systemMessage:
-            "You should provide accurate data for the chart generator to use.",
+            "You should provide accurate data for the chart generator to use. The following tool will parse the data in an array of objects with 'label' and 'value' keys.",
     });
 
     async function researchNode(state, config) {
@@ -296,10 +297,8 @@ export const multiAgentFunction = async function* ({ content, tags, agent }: { c
 
     workflow.addConditionalEdges(
         "call_tool",
-        // Each agent node updates the 'sender' field
-        // the tool calling node does not, meaning
-        // this edge will route back to the original agent
-        // who invoked the tool
+        // Each agent node updates the 'sender' field. The tool calling node does not, 
+        // meaning this edge will route back to the original agent who invoked the tool
         (x) => x.sender,
         {
             Researcher: "Researcher",
@@ -311,13 +310,11 @@ export const multiAgentFunction = async function* ({ content, tags, agent }: { c
     const graph = workflow.compile();
 
     // Invoke the graph
-    let streamOutputs = []
     const streamResults = await graph.stream(
         {
             messages: [
                 new HumanMessage({
-                    // content:
-                    //     "Generate a bar chart of the US gdp over the past 3 years.",
+                    // content: "Generate a bar chart of the US gdp over the past 3 years.",
                     content: content,
                 }),
             ],
@@ -325,22 +322,24 @@ export const multiAgentFunction = async function* ({ content, tags, agent }: { c
         { recursionLimit: MAX_RECURSION }
     );
 
-
-    for await (const output of await streamResults) {
+    let streamOutputs = []
+    for await (const output of streamResults) {
         if (!output?.__end__) {
             console.log(output);
             console.log("----");
+            streamOutputs.push(convertToPlainObject(output))
+            yield { streamOutputs, globalChartOptions }
+        } else if (output?.__end__) {
+            console.log("End of the stream")
+            console.log({ streamOutputs, globalChartOptions })
+            return { streamOutputs, globalChartOptions }
         }
-        const plainOutput = JSON.parse(JSON.stringify(output));
-        streamOutputs.push(plainOutput)
-        yield plainOutput;
     }
 
+    // console.log("streamOutputs", streamOutputs)
+    // console.log("globalChartOptions", globalChartOptions)
 
-    console.log("streamOutputs", streamOutputs)
-    console.log("globalChartOptions", globalChartOptions)
-
-    return { streamOutputs: streamOutputs, globalChartOptions: globalChartOptions };
+    // return { streamOutputs, globalChartOptions };
 
 }
 

@@ -40,19 +40,7 @@ export function MultiAgentMessage({
     tags?: SupabaseTag[]
     className?: string
 }) {
-    // const question = `Question: ${data[0].kwargs.content}`
-    // const answer = `Answer: ${data[2].kwargs.content}`
-
-    {
-        data?.globalChartOptions && ChartJS.register(
-            CategoryScale,
-            LinearScale,
-            BarElement,
-            Title,
-            ChartTooltip,
-            Legend
-        )
-    }
+    console.log(data)
 
     const multiAgentIconMap = {
         Researcher: "🔍",
@@ -62,6 +50,16 @@ export function MultiAgentMessage({
 
     // const streamedData = useStreamableText(data)
     // const streamedObject = JSON.parse(streamedData)
+
+    const hasValidChart = data?.globalChartOptions?.chartData?.datasets?.every(dataset => dataset.data.length) && data?.globalChartOptions?.options?.scales
+    hasValidChart && ChartJS.register(
+        CategoryScale,
+        LinearScale,
+        BarElement,
+        Title,
+        ChartTooltip,
+        Legend
+    )
 
     return (
         <div className={cn('group relative flex items-start md:-ml-12', className)}>
@@ -76,7 +74,7 @@ export function MultiAgentMessage({
                             <div className='flex justify-between'>
                                 <div>MultiAgent Results:</div>
                                 <Tooltip>
-                                    <TooltipTrigger><AccordionTrigger className='hover:no-underline py-2'>💡</AccordionTrigger></TooltipTrigger>
+                                    <TooltipTrigger asChild><AccordionTrigger className='hover:no-underline py-2'>💡</AccordionTrigger></TooltipTrigger>
                                     <TooltipContent>
                                         <p>Show sources</p>
                                     </TooltipContent>
@@ -85,29 +83,30 @@ export function MultiAgentMessage({
                         </div>
                         {/* <MarkdownWrapper text={text} /> */}
 
-                        {data?.streamOutputs.filter(step => Object.keys(step)[0] != "call_tool" && Object.keys(step)[0] != "__end__").map((step, index) => {
-                            const stepKey = Object.keys(step)[0];
-                            const stepData = step[stepKey];
+                        {data?.streamOutputs?.filter(step =>
+                            Object.keys(step)[0] != "call_tool" &&
+                            Object.keys(step)[0] != "__end__")
+                            ?.map((step, index) => {
+                                const stepKey = Object.keys(step)[0];
+                                const stepData = step[stepKey];
 
-                            // return null if there are no message contents, eg for function calls
-                            if (!stepData.messages || !stepData.messages.some(message => message.kwargs.content)) return null;
+                                // return null if there are no message contents, eg for function calls
+                                if (!stepData.messages || !stepData.messages.some(message => message.kwargs.content)) return null;
 
-                            return (
-                                <div key={index}>
-                                    <h3>{multiAgentIconMap[stepKey as keyof typeof multiAgentIconMap]} {stepKey}</h3>
-                                    {stepData.messages.map((message) => (
-                                        <div>
-                                            {/* <pre key={messageIndex}>{JSON.stringify(message.kwargs, null, 2)}</pre> */}
-                                            {/* // <pre key={messageIndex}>{JSON.stringify(message, null, 2)}</pre> */}
-                                            {message.kwargs && <div>{message.kwargs.content}</div>}
-                                        </div>
-                                    ))}
-                                    <br />
-                                </div>
-                            );
-                        })}
+                                return (
+                                    <div key={index}>
+                                        <h3>{multiAgentIconMap[stepKey as keyof typeof multiAgentIconMap]} {stepKey}</h3>
+                                        {stepData.messages.map((message) => (
+                                            <div>
+                                                {message.kwargs && <div>{message.kwargs.content}</div>}
+                                            </div>
+                                        ))}
+                                        <br />
+                                    </div>
+                                );
+                            })}
 
-                        {data?.globalChartOptions && <Bar data={data.globalChartOptions.chartData} options={data.globalChartOptions.options} />}
+                        {hasValidChart && <Bar data={data.globalChartOptions.chartData} options={data.globalChartOptions.options} />}
 
                         <AccordionContent>
                             {/* @ts-expect-error Type 'Json | undefined' is not an array type. ts(2461) */}
@@ -140,8 +139,8 @@ export function MultiAgentMessage({
                                 ))}</div>
                             </div> : null}
 
-                            <div>total</div>
-                            <pre>{JSON.stringify(data, null, 2)}</pre>
+                            <div>Entire data object: </div>
+                            <pre className="max-w-[600px] overflow-auto">{JSON.stringify(data, null, 2)}</pre>
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>

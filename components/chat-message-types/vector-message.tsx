@@ -55,7 +55,7 @@ export function VectorMessage({
                             <div className='flex justify-between'>
                                 <div>VectorSearch Results:</div>
                                 {sections && (<Tooltip>
-                                    <TooltipTrigger><AccordionTrigger className='hover:no-underline py-2'>💡</AccordionTrigger></TooltipTrigger>
+                                    <TooltipTrigger asChild><AccordionTrigger className='hover:no-underline py-2'>💡</AccordionTrigger></TooltipTrigger>
                                     <TooltipContent>
                                         <p>Show sources</p>
                                     </TooltipContent>

@@ -181,3 +181,7 @@ export async function retrySupabaseOperation(
     throw new Error(`Supabase operation failed: ${error}`)
   }
 }
+
+export function convertToPlainObject(object: any) {
+  return JSON.parse(JSON.stringify(object))
+}

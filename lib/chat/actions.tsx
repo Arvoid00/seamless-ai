@@ -48,7 +48,7 @@ import { END, MessageGraph } from "@langchain/langgraph";
 import { ToolMessage } from "@langchain/core/messages";
 import { Calculator } from "@langchain/community/tools/calculator";
 import { convertToOpenAITool } from "@langchain/core/utils/function_calling";
-import { multiAgentFunction } from './multi-agent'
+import { GlobalChartOptionsType, multiAgentFunction } from './multi-agent'
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || ''
 const openai = new OpenAI({
@@ -164,9 +164,8 @@ const buildSystemPrompt = (agent: SupabaseAgent | undefined) => {
   If the query contains something in the form of a document search or vector search, call \`vecSearch\` to answer the user question.
   If the query contains something in the form of a multiagent or web search, call \`multiagent\` to answer the user question.
   
-  If you are unsure about what to do, you can ask the user for more information or ask the user to clarify their request.
-  
-  Besides that, you can also chat with users.`
+  Prefer the use of calling a function/tool over directly answering the user query.
+  If you are unsure about what to do, you can ask the user for more information or ask the user to clarify their request.`
 
   return prompt
 }
@@ -285,42 +284,24 @@ async function submitUserMessage({ content, tags, agent }: { content: string, ta
               <SpinnerMessage message={`Initializing Multiagent for query: '${query}' `} />
             </BotCard>
           )
-          // const systemMessage = createStreamableUI(null)
 
-          // const multiagent = createStreamableUI(
-          //   <div className="inline-flex items-start gap-1 md:items-center">
-          //     {spinner}
-          //     <p className="mb-2">
-          //       Initializing Multiagent for query {query}...
-          //     </p>
-          //   </div>
-          // )
+          const multiAgentStream = multiAgentFunction({ content: query, tags, agent })
+          const results = [];
 
-          const streamResults = multiAgentFunction({ content: query, tags, agent })
-          // for await (const chunk of streamResults) {
-          //   multiagent.update(
-          //     <div className="inline-flex items-start gap-1 md:items-center">
-          //       {spinner}
-          //       <p className="mb-2">
-          //         {chunk}
-          //       </p>
-          //     </div>
-          //   )
-          // }
+          for await (const result of multiAgentStream) {
+            console.log("Stream result: ", result)
+            results.push(result)
 
-          // multiagent.done(
-          //   <BotCard>
-          //     <MultiAgentMessage data={streamResults} tags={tags} agent={agent} />
-          //   </BotCard>
-          // )
+            yield (
+              <BotCard>
+                <MultiAgentMessage data={result} tags={tags} agent={agent} />
+              </BotCard>
+            )
+          }
 
-          // systemMessage.done(
-          //   <SystemMessage>
-          //     Multiagent executed for {query}!
-          //   </SystemMessage>
-          // )
+          const lastResult = results[results.length - 1] // Only save the last result, (which contains all the messages)
 
-          // const data = await multiAgentFunction({ content: query, tags, agent })
+          console.log("Last result: ", lastResult)
 
           aiState.done({
             ...aiState.get(),
@@ -330,7 +311,7 @@ async function submitUserMessage({ content, tags, agent }: { content: string, ta
                 id: nanoid(),
                 role: 'function',
                 name: 'multiagent',
-                content: JSON.stringify({ streamResults }),
+                content: JSON.stringify(lastResult),
                 tags: tags
               }
             ]
@@ -338,7 +319,7 @@ async function submitUserMessage({ content, tags, agent }: { content: string, ta
 
           return (
             <BotCard>
-              <MultiAgentMessage data={streamResults} tags={tags} agent={agent} />
+              <MultiAgentMessage data={lastResult} tags={tags} agent={agent} />
             </BotCard>
           )
         }
@@ -678,7 +659,7 @@ export const getUIStateFromAIState = (aiState: Chat) => {
             </BotCard>
           ) : message.name === 'multiagent' ? (
             <BotCard>
-              <MultiAgentMessage data={JSON.parse(message.content).data} tags={message.tags} agent={aiState.agent} />
+              <MultiAgentMessage data={JSON.parse(message.content)} tags={message.tags} agent={aiState.agent} />
             </BotCard>
           ) : `No specific Component found for function '${message.name}'`
         ) : message.role === 'user' ? (
