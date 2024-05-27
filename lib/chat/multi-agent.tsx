@@ -149,7 +149,7 @@ export async function* multiAgentFunction({ content, tags, agent }: { content: s
         };
     }
 
-    const llm = new ChatOpenAI({ modelName: "gpt-4o" });
+    const llm = new ChatOpenAI({ modelName: "gpt-3.5-turbo" });
 
     // Research agent and node
     const researchAgent = await createAgent({

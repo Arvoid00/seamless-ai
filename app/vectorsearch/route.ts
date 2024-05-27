@@ -91,7 +91,7 @@ export async function POST(req: Request, res: NextApiResponse) {
     await supabase.rpc('match_documents_new', {
       query_embedding: embedding,
       match_threshold: 0.0, //0.78,
-      match_count: 5,
+      match_count: 8,
       filter: {},
       tags: tags.map((tag: any) => tag.value)
       // min_content_length: 50
@@ -135,8 +135,8 @@ export async function POST(req: Request, res: NextApiResponse) {
 
   const openai = new OpenAI({ apiKey: OPENAI_API_KEY })
   const completion = await openai.chat.completions.create({
-    model: 'gpt-3.5-turbo',
-    max_tokens: 1000,
+    model: 'gpt-4o',
+    // max_tokens: 1000,
     temperature: 0,
     stream: false,
     messages: [systemMessage]

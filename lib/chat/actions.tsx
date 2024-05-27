@@ -196,7 +196,7 @@ async function submitUserMessage({ content, tags, agent }: { content: string, ta
   let textNode: undefined | React.ReactNode
 
   const ui = render({
-    model: 'gpt-3.5-turbo',
+    model: 'gpt-4o',
     provider: openai,
     initial: <SpinnerMessage />,
     messages: [
