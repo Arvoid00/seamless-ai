@@ -23,6 +23,7 @@ import {
   TooltipContent,
   TooltipTrigger
 } from '@/components/ui/tooltip'
+import { useAgent } from '@/lib/hooks/use-current-agent'
 
 interface SidebarActionsProps {
   chat: Chat
@@ -39,6 +40,7 @@ export function SidebarActions({
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
   const [shareDialogOpen, setShareDialogOpen] = React.useState(false)
   const [isRemovePending, startRemoveTransition] = React.useTransition()
+  const { agent } = useAgent()
 
   return (
     <>
@@ -108,7 +110,7 @@ export function SidebarActions({
 
                   setDeleteDialogOpen(false)
                   router.refresh()
-                  router.push('/')
+                  router.push(agent ? agent.name : '/')
                   toast.success('Chat deleted')
                 })
               }}
