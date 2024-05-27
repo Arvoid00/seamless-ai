@@ -37,7 +37,7 @@ import { UseFormReturn } from "react-hook-form";
 // FIXME: https://twitter.com/lemcii/status/1659649371162419202?s=46&t=gqNnMIjMWXiG2Rbrr5gT6g
 // Removing states would help maybe?
 
-const ALL_FUNCTIONS = ["Web search", "Document Search", "CCCCCCCCCCCCCCC", "DDDDDDDDDDDDD"]
+const ALL_FUNCTIONS = ["Web search", "Document Search"]
 type Function = string
 
 export function FunctionMultiSelect({ currentItems, form }: { currentItems: Function[], form: UseFormReturn<AgentSchema> }) {
