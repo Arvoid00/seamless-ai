@@ -126,7 +126,7 @@ export function ChatPanel({
               </div>
             ))}
         </div>
-        {messages.length === 0 && !agent && <p className='font-semibold p-1'>Use an agent</p>}
+        {/* {messages.length === 0 && !agent && <p className='font-semibold p-1'>Use an agent</p>}
         <div className="mb-4 grid grid-cols-2 gap-2 px-4 sm:px-0">
           {messages.length === 0 && !agent &&
             agents.map((agent, index) => (
@@ -140,9 +140,9 @@ export function ChatPanel({
                 }}
               >
                 <div className="text-sm font-semibold mb-1">🤖 {agent.name}</div>
-                <div className="text-sm text-zinc-600">
-                  {/* @ts-ignore Property 'map' does not exist on type 'string | number | boolean | { [key: string]: Json | undefined; } | Json[]'. */}
-                  {agent.tags?.map(tag => (
+                <div className="text-sm text-zinc-600"> */}
+        {/* @ts-ignore Property 'map' does not exist on type 'string | number | boolean | { [key: string]: Json | undefined; } | Json[]'. */}
+        {/* {agent.tags?.map(tag => (
                     <Badge key={tag.id} style={badgeStyle(tag.color)} className='mr-1 mb-1'>
                       {tag.name}
                     </Badge>
@@ -150,7 +150,7 @@ export function ChatPanel({
                 </div>
               </div>
             ))}
-        </div>
+      </div> */}
         {messages.length === 0 && <p className='font-semibold p-1'>Example questions</p>}
         <div className="mb-4 grid grid-cols-2 gap-2 px-4 sm:px-0">
           {messages.length === 0 &&
@@ -204,6 +204,6 @@ export function ChatPanel({
           {/* <FooterText className="hidden sm:block" /> */}
         </div>
       </div>
-    </div>
+    </div >
   )
 }
