@@ -13,7 +13,7 @@ import { UserMenu } from '@/components/user-menu'
 import { SidebarMobile } from './sidebar-mobile'
 import { SidebarToggle } from './sidebar-toggle'
 import { ChatHistory } from './chat-history'
-import { getUser, getUserProfileWithOrg } from '@/app/(auth)/actions'
+import { getUser, getUserProfile, getUserProfileWithOrg } from '@/app/(auth)/actions'
 import { CommandMenu } from './command-menu'
 import {
   Tooltip,
@@ -22,7 +22,8 @@ import {
 } from '@/components/ui/tooltip'
 
 async function UserOrLogin() {
-  const user = await getUserProfileWithOrg()
+  // const user = await getUserProfileWithOrg()
+  const user = await getUserProfile()
   return (
     <>
       {user ? (
@@ -66,7 +67,7 @@ export function Header() {
         </Button>
       </div>
       <div className='flex items-center'>
-        <Button variant="link" asChild>
+        {/* <Button variant="link" asChild>
           <Link href="/docs">Documents</Link>
         </Button>
         <Button variant="link" asChild>
@@ -74,7 +75,7 @@ export function Header() {
         </Button>
         <Button variant="link" asChild>
           <Link href="/agents">Agents</Link>
-        </Button>
+        </Button> */}
         <CommandMenu />
       </div>
       {/* <div className="flex items-center justify-end space-x-2">

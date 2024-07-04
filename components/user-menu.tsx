@@ -7,11 +7,11 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { User } from '@supabase/supabase-js'
-import { signout } from '@/app/(auth)/actions'
+import { getUserProfile, signout } from '@/app/(auth)/actions'
 import { SupabaseOrganization } from '@/types/supabase'
 
 export interface UserMenuProps {
-  user: User & { organizations: SupabaseOrganization }
+  user: User & { organizations: SupabaseOrganization } & { name?: string }
 }
 
 function getUserInitials(name: string) {
@@ -19,7 +19,11 @@ function getUserInitials(name: string) {
   return lastName ? `${firstName[0]}${lastName[0]}` : firstName.slice(0, 2)
 }
 
-export function UserMenu({ user }: UserMenuProps) {
+export async function UserMenu({ user }: UserMenuProps) {
+
+  const profile = await getUserProfile()
+  if (!profile) return null
+
   return (
     <div className="flex items-center justify-between">
       <DropdownMenu>
@@ -28,17 +32,18 @@ export function UserMenu({ user }: UserMenuProps) {
             <div className="flex size-7 shrink-0 select-none items-center justify-center rounded-full bg-muted/50 text-xs font-medium uppercase text-muted-foreground">
               {getUserInitials(user.email ?? "example@domain.com")}
             </div>
-            <span className="ml-2 hidden md:block">{user.email}</span>
+            <span className="ml-2 hidden md:block">{profile.name}</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent sideOffset={8} align="start" className="w-fit">
           <DropdownMenuItem className="flex-col items-start">
+            <div className="text-xs text-zinc-500">{user.name}</div>
             <div className="text-xs text-zinc-500">{user.email}</div>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="flex-col items-start">
+          {/* <DropdownMenuItem className="flex-col items-start">
             <div className="text-xs text-zinc-500">{user.organizations.name}</div>
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
           <DropdownMenuSeparator />
           <form
             action={async () => {

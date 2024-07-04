@@ -270,7 +270,7 @@ export function CommandMenu() {
                     </CommandGroup>
 
                     <CommandGroup>
-                        {!usedAgent ? tags.map((tag) => {
+                        {!usedAgent && tags ? tags.map((tag) => {
                             const isActive = selectedTags.includes(tag);
                             return (
                                 <SubItem

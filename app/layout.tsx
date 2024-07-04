@@ -13,10 +13,10 @@ export const metadata = {
     ? new URL(`https://${process.env.VERCEL_URL}`)
     : undefined,
   title: {
-    default: 'Seamless AI',
-    template: `%s - Seamless AI`
+    default: 'Equilibrify - Create your digital personality',
+    template: `%s - Equilibrify`
   },
-  description: 'An AI-powered chatbot built by Seamless.',
+  description: 'Description of the site',
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon-16x16.png',
