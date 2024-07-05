@@ -17,8 +17,19 @@ export interface MBCharacteristics {
     perceiving_score: number;
 }
 
+const defaultMBCharacteristics: MBCharacteristics = {
+    extraversion_score: 50,
+    introversion_score: 50,
+    sensing_score: 50,
+    intuition_score: 50,
+    thinking_score: 50,
+    feeling_score: 50,
+    judging_score: 50,
+    perceiving_score: 50,
+};
+
 function MBForm({ MBvalues }: { MBvalues: MBCharacteristics }) {
-    const [values, setValues] = useState(MBvalues);
+    const [values, setValues] = useState(MBvalues ?? defaultMBCharacteristics);
 
     const handleSliderChange = (key: string, oppositeKey: string, value: number) => {
         setValues({
@@ -93,8 +104,11 @@ function MBForm({ MBvalues }: { MBvalues: MBCharacteristics }) {
                 <p>Perceiving {values.perceiving_score}%</p>
             </div>
             <div className='flex justify-center'>
-                <Button type='submit'>Submit</Button>
+                <Button type='submit'>Submit characteristics</Button>
             </div>
+
+            <p>MBTI characteristics scales: 0 to 100 %</p>
+            <pre className='text-left'>{JSON.stringify(values, null, 2)}</pre>
         </form>
     )
 }
