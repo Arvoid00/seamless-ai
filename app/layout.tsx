@@ -13,8 +13,8 @@ export const metadata = {
     ? new URL(`https://${process.env.VERCEL_URL}`)
     : undefined,
   title: {
-    default: 'Equilibrify - Create your digital personality',
-    template: `%s - Equilibrify`
+    default: 'Serenify - Create your digital personality',
+    template: `%s - Serenify`
   },
   description: 'Description of the site',
   icons: {

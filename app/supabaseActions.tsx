@@ -62,7 +62,21 @@ export async function upsertIntelligences(values: any) {
     }
 
     const { data, error } = await supabase.from('intelligences').upsert(intelligences, { onConflict: 'user_id' }).eq('user_id', user.id).select('*').single();
-    console.log(data, error)
+
+    return { data, error };
+}
+
+export async function getQuiz(quizId: number) {
+    const supabase = createClient();
+
+    const { data, error } = await supabase.from('quizzes').select('*').eq('id', quizId).maybeSingle().throwOnError();
+    return { data, error };
+}
+
+export async function getQuizQuestions(quizId: number) {
+    const supabase = createClient();
+
+    const { data, error } = await supabase.from('quiz_questions').select('quiz_id,questions(*)').eq('quiz_id', quizId).throwOnError();
 
     return { data, error };
 }

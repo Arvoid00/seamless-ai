@@ -185,3 +185,7 @@ export async function retrySupabaseOperation(
 export function convertToPlainObject(object: any) {
   return JSON.parse(JSON.stringify(object))
 }
+
+export const isEmptyObject = (obj: any) => {
+  return Object.keys(obj).length === 0 && obj.constructor === Object
+}
