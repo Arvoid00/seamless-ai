@@ -32,14 +32,19 @@ export async function getChatCompletion(message: string): Promise<string> {
 }
 
 export async function generateDynamicQuestions(MBValues: MBCharacteristics): Promise<any> {
-    let prompt = "You are an expert on the Myers-Briggs typeindicator. Based on the given characteristics, I want you to generate a set of questions to reflect on these characteristics. Do not specify the intelligence type or MBTI profile in the question. I need to respond in likert-scale, rangeing 1 to 5."
-    prompt += MBValues;
-    prompt += "ALWAYS return a JSON formatted list of questions where the key is 'question'.";
+
+    const prompt = `
+    You are an expert on the Myers-Briggs typeindicator. Based on the given characteristics, I want you to generate a set of questions to reflect on these characteristics. 
+    Do not specify the intelligence type or MBTI profile in the question. Generate questions that can be answered on a scale from 'strongly agree' to 'strongly disagree'.
+    Below are the characteristics:
+    
+    ${MBValues}
+
+    Important: ALWAYS return a JSON formatted list of questions where the key is 'question'.
+
+    `;
 
     const response = await getChatCompletion(prompt);
-    // console.log(response);
-    // console.log(response.content);
-
     const parsedQuestions = JSON.parse(response.content)
 
     return parsedQuestions;

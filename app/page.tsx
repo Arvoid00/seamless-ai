@@ -1,8 +1,9 @@
 import MBForm, { MBCharacteristics } from '@/components/MBForm';
 import Image from 'next/image';
-import { getIntelligences, getMBCharacteristics, getQuiz, getQuizQuestions } from './supabaseActions';
+import { getIntelligences, getMBCharacteristics, getQuiz, getQuizQuestions, getQuizResults } from './supabaseActions';
 import IntelligencesForm, { Intelligences } from '@/components/IntelligencesForm';
-import Quiz from '@/components/Quiz';
+import DynamicQuiz from '@/components/DynamicQuiz';
+import StaticQuiz from '@/components/StaticQuiz';
 
 export default async function HomePage() {
 
@@ -19,7 +20,9 @@ export default async function HomePage() {
     const intelligenceValues = intelligenceData as Intelligences;
 
     const { data: MBTIReflectionQuiz, error: MBTIReflectionQuizError } = await getQuiz(1);
-    const { data: MBTIReflectionQuizQuestions, error: MBTIReflectionQuizQuestionsError } = await getQuizQuestions(1);
+
+    const { data: StaticQuizWithQuestions, error: StaticQuizWithQuestionsError } = await getQuizQuestions(2);
+    const { data: StaticQuizResults, error: StaticQuizResultsError } = await getQuizResults(2);
 
     return (
         <main className='space-y-10'>
@@ -71,10 +74,12 @@ export default async function HomePage() {
                     <h2 className="p-5 text-2xl font-bold text-center">Quiz</h2>
                     <h2 className="text-base text-gray-600 font-bold text-center">Quizzes to better understand your personality</h2>
 
-                    {MBTIReflectionQuiz && MBTIReflectionQuizQuestions && <Quiz quiz={MBTIReflectionQuiz} MBValues={MBValues} />}
+                    {MBTIReflectionQuiz && MBTIReflectionQuiz && <DynamicQuiz quiz={MBTIReflectionQuiz} MBValues={MBValues} />}
+                    {StaticQuizWithQuestions && <StaticQuiz data={StaticQuizWithQuestions} previousResult={StaticQuizResults.results} />}
                 </div>
             </div>
 
         </main>
+
     );
 }

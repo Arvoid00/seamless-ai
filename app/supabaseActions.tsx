@@ -75,8 +75,42 @@ export async function getQuiz(quizId: number) {
 
 export async function getQuizQuestions(quizId: number) {
     const supabase = createClient();
+    const { data: quiz, error: quizError } = await getQuiz(quizId)
+    const { data, error } = await supabase.from('quiz_questions').select('*,questions(*)').eq('quiz_id', quizId).throwOnError();
 
-    const { data, error } = await supabase.from('quiz_questions').select('quiz_id,questions(*)').eq('quiz_id', quizId).throwOnError();
+    const returnData = { quiz: quiz, questions: data?.map(q => q.questions) }
+
+    return { data: returnData, error };
+}
+
+export async function upsertQuizResults(quiz_id: number, results: any) {
+    const supabase = createClient();
+
+    const {
+        data: { user }, error: userError
+    } = await supabase.auth.getUser()
+    if (!user) return { data: null, error: userError }
+
+    const quizResults = {
+        quiz_id,
+        user_id: user.id,
+        results
+    }
+
+    const { data, error } = await supabase.from('quiz_results').upsert(quizResults, { onConflict: 'user_id,quiz_id' }).match({ user_id: user.id, quiz_id: quiz_id }).select('*').single();
+
+    return { data, error };
+}
+
+export async function getQuizResults(quiz_id: number) {
+    const supabase = createClient();
+
+    const {
+        data: { user }, error: userError
+    } = await supabase.auth.getUser()
+    if (!user) return { data: null, error: userError }
+
+    const { data, error } = await supabase.from('quiz_results').select('*').match({ user_id: user.id, quiz_id: quiz_id }).maybeSingle();
 
     return { data, error };
 }
