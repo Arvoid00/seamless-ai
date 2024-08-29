@@ -1,11 +1,33 @@
 import MBForm, { MBCharacteristics } from '@/components/MBForm';
 import Image from 'next/image';
-import { getIntelligences, getMBCharacteristics, getQuiz, getQuizQuestions, getQuizResults } from './supabaseActions';
+import { getIntelligences, getMBCharacteristics, getQuiz, getQuizQuestions, getQuizResults, getUserProfile } from './supabaseActions';
 import IntelligencesForm, { Intelligences } from '@/components/IntelligencesForm';
 import DynamicQuiz from '@/components/DynamicQuiz';
 import StaticQuiz from '@/components/StaticQuiz';
+import { redirect } from 'next/navigation';
+import { createClient } from '@/utils/supabase/server';
 
 export default async function HomePage() {
+
+    const supabase = createClient()
+
+    const { data: a, error: b } = await supabase.auth.getUser()
+    if (b || !a?.user) {
+        redirect('/login')
+    }
+
+    console.log('HomePage');
+
+    const { data: userProfile, error: userProfileError } = await getUserProfile();
+    if (userProfileError) {
+        console.error(userProfileError);
+        throw userProfileError;
+    }
+
+    const validProfile = userProfile && userProfile.human_design && userProfile.background_results && userProfile.mbti_results === null;
+    console.log('validProfile', validProfile);
+
+    if (!validProfile) redirect('/onboarding')
 
     const { data, error } = await getMBCharacteristics();
     if (error) {
