@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/server";
 import { MBCharacteristics } from "@/components/MBForm";
 import { FormItems } from "@/components/onboarding/OnboardingForm";
 import { date } from "zod";
+import { padZero } from "@/lib/utils";
 
 export async function getUserProfile() {
     const supabase = createClient();
@@ -162,7 +163,6 @@ export async function processOnboarding(data: FormItems) {
         }
 
         const humanDesignData = await getHumanDesignData(humanDesignInput);
-        console.log('Human Design Data:', humanDesignData);
 
         const { data: MBCharacteristicsData, error: MBCharacteristicsError } = await upsertMBCharacteristics(MBTIData);
 
@@ -204,7 +204,7 @@ export async function getHumanDesignData(data) {
         console.log('Timezone:', timezone);
         const HDInput = {
             api_key: process.env.BODYGRAPH_API_KEY!,
-            date: `${data.year}-${data.month}-${data.day} ${data.hour}:${data.minute}`,
+            date: `${data.year}-${padZero(data.month)}-${padZero(data.day)} ${padZero(data.hour)}:${padZero(data.minute)}`,
             timezone: timezone || 'Europe/Amsterdam',
         }
 
@@ -213,7 +213,8 @@ export async function getHumanDesignData(data) {
         console.log('HD URL:', url);
         const response = await fetch(url)
         if (!response.ok) {
-            console.error('Error fetching HD data:', response.statusText);
+            console.error('Error fetching HD data:', response.status, response.statusText);
+            throw new Error(`Error fetching HD data: ${response.status, response.statusText}`);
         }
 
         const result = await response.json();
@@ -245,7 +246,7 @@ export async function getHumanDesignTimezone(location: string) {
         }
 
         const result = await response.json();
-        console.log(result)
+        // console.log(result)
         if (result.length === 0) {
             console.log('No timezone found, using default timezone Europe/Amsterdam');
             return 'Europe/Amsterdam';
@@ -258,4 +259,17 @@ export async function getHumanDesignTimezone(location: string) {
         throw error;
     }
 
+}
+
+export async function getOnboardingData() {
+    const supabase = createClient();
+
+    const {
+        data: { user }, error: userError
+    } = await supabase.auth.getUser()
+    if (!user) return { data: null, error: userError }
+
+    const { data: profile, error: profileError } = await supabase.from('profiles').select('*, characteristics(*)').eq('user_id', user.id).maybeSingle();
+
+    return { data: profile, error: profileError };
 }

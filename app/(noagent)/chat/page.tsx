@@ -1,11 +1,11 @@
 import { Metadata } from "next"
-import { getUser } from "../(auth)/actions"
+import { getUser } from "@/app/(auth)/actions"
 import { redirect } from "next/navigation"
 import { nanoid } from "nanoid"
-import { getChat, getMissingKeys } from "../actions"
+import { getChat, getMissingKeys } from "@/app/actions"
 import { AI } from "@/lib/chat/actions"
 import { Chat } from "@/components/chat"
-import { getAgentByName } from "../agents/actions"
+import { getAgentByName } from "@/app/agents/actions"
 
 
 export async function generateMetadata(): Promise<Metadata> {

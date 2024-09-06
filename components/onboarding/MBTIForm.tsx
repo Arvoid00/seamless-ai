@@ -6,6 +6,7 @@ import { z } from "zod";
 import { UseFormReturn } from "react-hook-form";
 import { Slider } from '@/components/ui/slider'
 import { FormItems } from "./OnboardingForm";
+import { useEffect } from "react";
 
 export const MBCharacteristicsFormSchema = z.object({
     extraversion_score: z.number().min(0).max(100),
@@ -38,23 +39,33 @@ export const defaultMBCharacteristics = {
 };
 
 const MBTIForm = ({ form }: { form: UseFormReturn<FormItems> }) => {
-    const { register, formState: { errors }, setValue, getValues } = form;
+    const { register, formState: { errors }, setValue, getValues, watch } = form;
 
     const handleSliderChange = (key: string, oppositeKey: string, value: number) => {
+        console.log(key, oppositeKey, value);
         setValue(key as keyof FormData, value);
         setValue(oppositeKey as keyof FormData, 100 - value);
     };
 
-    const calculatePersonalityType = () => {
-        let result = "";
-        result += getValues("extraversion_score") > 50 ? "E" : "I";
-        result += getValues("sensing_score") > 50 ? "S" : "N";
-        result += getValues("thinking_score") > 50 ? "T" : "F";
-        result += getValues("judging_score") > 50 ? "J" : "P";
-        result += getValues("assertive_score") > 50 ? "-A" : "-T";
-        setValue("personality_type" as keyof FormData, result);
-        return result;
-    }
+    const extraversion_score = watch('extraversion_score');
+    const sensing_score = watch('sensing_score');
+    const thinking_score = watch('thinking_score');
+    const judging_score = watch('judging_score');
+    const assertive_score = watch('assertive_score');
+
+    // Calculate the personality type whenever the relevant values change
+    useEffect(() => {
+        const calculatePersonalityType = () => {
+            let result = '';
+            result += extraversion_score > 50 ? 'E' : 'I';
+            result += sensing_score > 50 ? 'S' : 'N';
+            result += thinking_score > 50 ? 'T' : 'F';
+            result += judging_score > 50 ? 'J' : 'P';
+            result += assertive_score > 50 ? '-A' : '-T';
+            setValue('personality_type', result); // Set personality_type once, within the effect
+        };
+        calculatePersonalityType();
+    }, [extraversion_score, sensing_score, thinking_score, judging_score, assertive_score, setValue]);
 
     const personalityScores = [
         { labelLeft: "Extraversion", labelRight: "Introversion", key: "extraversion_score", oppositeKey: "introversion_score" },
@@ -63,6 +74,8 @@ const MBTIForm = ({ form }: { form: UseFormReturn<FormItems> }) => {
         { labelLeft: "Judging", labelRight: "Perceiving", key: "judging_score", oppositeKey: "perceiving_score" },
         { labelLeft: "Assertive", labelRight: "Turbulent", key: "assertive_score", oppositeKey: "turbulent_score" },
     ]
+
+    const values = watch();
 
     return (
         <FormWrapper
@@ -74,7 +87,7 @@ const MBTIForm = ({ form }: { form: UseFormReturn<FormItems> }) => {
                     <div key={index} className='flex items-center justify-between gap-4'>
                         <p className="w-1/4 text-right">{item.labelLeft} {getValues(item.key as keyof FormData)}%</p>
                         <Slider
-                            value={[Number(getValues(item.key as keyof FormData))]}
+                            value={[Number(values[item.key as keyof FormData])]}
                             onValueChange={(vals: number[]) => handleSliderChange(item.key, item.oppositeKey, vals[0])}
                             min={0}
                             max={100}
@@ -84,7 +97,7 @@ const MBTIForm = ({ form }: { form: UseFormReturn<FormItems> }) => {
                         <p className="w-1/4">{item.labelRight} {getValues(item.oppositeKey as keyof FormData)}%</p>
                     </div>
                 ))}
-                <p>Your personality type based on the given answers is: <b>{calculatePersonalityType()}</b></p>
+                <p>Your personality type based on the given answers is: <b>{watch('personality_type')}</b></p>
             </div>
         </FormWrapper>
     );

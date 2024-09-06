@@ -236,131 +236,131 @@ async function submitUserMessage({ content, tags, agent }: { content: string, ta
       return textNode
     },
     functions: {
-      langGraph: {
-        description:
-          'Use langgraph to answer the user question. Use this function to answer user questions based on the user query.',
-        parameters: z.object({
-          query: z.string().describe('The query to use in langgraph.'),
-        }),
-        render: async function* ({ query }) {
-          yield (
-            <BotCard>
-              <SpinnerMessage message={`Initializing Langgraph for query: '${query}' `} />
-            </BotCard>
-          )
+      // langGraph: {
+      //   description:
+      //     'Use langgraph to answer the user question. Use this function to answer user questions based on the user query.',
+      //   parameters: z.object({
+      //     query: z.string().describe('The query to use in langgraph.'),
+      //   }),
+      //   render: async function* ({ query }) {
+      //     yield (
+      //       <BotCard>
+      //         <SpinnerMessage message={`Initializing Langgraph for query: '${query}' `} />
+      //       </BotCard>
+      //     )
 
-          const data = await useLangGraphModel({ content: query, tags, agent })
+      //     const data = await useLangGraphModel({ content: query, tags, agent })
 
-          aiState.done({
-            ...aiState.get(),
-            messages: [
-              ...aiState.get().messages,
-              {
-                id: nanoid(),
-                role: 'function',
-                name: 'langgraph',
-                content: JSON.stringify({ data }),
-                tags: tags
-              }
-            ]
-          })
+      //     aiState.done({
+      //       ...aiState.get(),
+      //       messages: [
+      //         ...aiState.get().messages,
+      //         {
+      //           id: nanoid(),
+      //           role: 'function',
+      //           name: 'langgraph',
+      //           content: JSON.stringify({ data }),
+      //           tags: tags
+      //         }
+      //       ]
+      //     })
 
-          return (
-            <BotCard>
-              <LangGraphMessage data={data} tags={tags} agent={agent} />
-            </BotCard>
-          )
-        }
-      },
-      multiagent: {
-        description:
-          'Use multiagent to answer the user question. Use this function to answer user questions based on the user query.',
-        parameters: z.object({
-          query: z.string().describe('The query to use in multiagent.'),
-        }),
-        render: async function* ({ query }) {
-          yield (
-            <BotCard>
-              <SpinnerMessage message={`Initializing Multiagent for query: '${query}' `} />
-            </BotCard>
-          )
+      //     return (
+      //       <BotCard>
+      //         <LangGraphMessage data={data} tags={tags} agent={agent} />
+      //       </BotCard>
+      //     )
+      //   }
+      // },
+      // multiagent: {
+      //   description:
+      //     'Use multiagent to answer the user question. Use this function to answer user questions based on the user query.',
+      //   parameters: z.object({
+      //     query: z.string().describe('The query to use in multiagent.'),
+      //   }),
+      //   render: async function* ({ query }) {
+      //     yield (
+      //       <BotCard>
+      //         <SpinnerMessage message={`Initializing Multiagent for query: '${query}' `} />
+      //       </BotCard>
+      //     )
 
-          const multiAgentStream = multiAgentFunction({ content: query, tags, agent })
-          const results = [];
+      //     const multiAgentStream = multiAgentFunction({ content: query, tags, agent })
+      //     const results = [];
 
-          for await (const result of multiAgentStream) {
-            console.log("Stream result: ", result)
-            results.push(result)
+      //     for await (const result of multiAgentStream) {
+      //       console.log("Stream result: ", result)
+      //       results.push(result)
 
-            yield (
-              <BotCard>
-                <MultiAgentMessage data={result} tags={tags} agent={agent} />
-              </BotCard>
-            )
-          }
+      //       yield (
+      //         <BotCard>
+      //           <MultiAgentMessage data={result} tags={tags} agent={agent} />
+      //         </BotCard>
+      //       )
+      //     }
 
-          const lastResult = results[results.length - 1] // Only save the last result, (which contains all the messages)
+      //     const lastResult = results[results.length - 1] // Only save the last result, (which contains all the messages)
 
-          console.log("Last result: ", lastResult)
+      //     console.log("Last result: ", lastResult)
 
-          aiState.done({
-            ...aiState.get(),
-            messages: [
-              ...aiState.get().messages,
-              {
-                id: nanoid(),
-                role: 'function',
-                name: 'multiagent',
-                content: JSON.stringify(lastResult),
-                tags: tags
-              }
-            ]
-          })
+      //     aiState.done({
+      //       ...aiState.get(),
+      //       messages: [
+      //         ...aiState.get().messages,
+      //         {
+      //           id: nanoid(),
+      //           role: 'function',
+      //           name: 'multiagent',
+      //           content: JSON.stringify(lastResult),
+      //           tags: tags
+      //         }
+      //       ]
+      //     })
 
-          return (
-            <BotCard>
-              <MultiAgentMessage data={lastResult} tags={tags} agent={agent} />
-            </BotCard>
-          )
-        }
-      },
-      vecSearch: {
-        description:
-          'Do a vector search. Search for a vector or document based on user input. Use this function to search for information based on the user query.',
-        parameters: z.object({
-          query: z.string().describe('The query to search for.'),
-        }),
-        render: async function* ({ query }) {
-          yield (
-            <BotCard>
-              <SpinnerMessage message={`Doing a VectorSearch for query: '${query}' `} />
-            </BotCard>
-          )
+      //     return (
+      //       <BotCard>
+      //         <MultiAgentMessage data={lastResult} tags={tags} agent={agent} />
+      //       </BotCard>
+      //     )
+      //   }
+      // },
+      // vecSearch: {
+      //   description:
+      //     'Do a vector search. Search for a vector or document based on user input. Use this function to search for information based on the user query.',
+      //   parameters: z.object({
+      //     query: z.string().describe('The query to search for.'),
+      //   }),
+      //   render: async function* ({ query }) {
+      //     yield (
+      //       <BotCard>
+      //         <SpinnerMessage message={`Doing a VectorSearch for query: '${query}' `} />
+      //       </BotCard>
+      //     )
 
-          const { data, usage, sections } = await getVectorResult(query, tags)
+      //     const { data, usage, sections } = await getVectorResult(query, tags)
 
-          aiState.done({
-            ...aiState.get(),
-            messages: [
-              ...aiState.get().messages,
-              {
-                id: nanoid(),
-                role: 'function',
-                name: 'vecSearch',
-                content: JSON.stringify({ data, usage }),
-                sections: sections,
-                tags: tags
-              }
-            ]
-          })
+      //     aiState.done({
+      //       ...aiState.get(),
+      //       messages: [
+      //         ...aiState.get().messages,
+      //         {
+      //           id: nanoid(),
+      //           role: 'function',
+      //           name: 'vecSearch',
+      //           content: JSON.stringify({ data, usage }),
+      //           sections: sections,
+      //           tags: tags
+      //         }
+      //       ]
+      //     })
 
-          return (
-            <BotCard>
-              <VectorMessage data={data} usage={usage} sections={sections} tags={tags} agent={agent} />
-            </BotCard>
-          )
-        }
-      },
+      //     return (
+      //       <BotCard>
+      //         <VectorMessage data={data} usage={usage} sections={sections} tags={tags} agent={agent} />
+      //       </BotCard>
+      //     )
+      //   }
+      // },
       listStocks: {
         description: 'List three imaginary stocks that are trending.',
         parameters: z.object({

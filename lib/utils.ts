@@ -189,3 +189,6 @@ export function convertToPlainObject(object: any) {
 export const isEmptyObject = (obj: any) => {
   return Object.keys(obj).length === 0 && obj.constructor === Object
 }
+
+export const padZero = (value: number) =>
+  value < 10 ? `0${value}` : `${value}`
