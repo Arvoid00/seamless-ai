@@ -24,10 +24,12 @@ export default async function HomePage() {
         throw userProfileError;
     }
 
-    const validProfile = userProfile && userProfile.human_design && userProfile.background_results && userProfile.mbti_results === null;
+    const validProfile = userProfile && userProfile.human_design_json && userProfile.background_results && userProfile.mbti_results;
     console.log('validProfile', validProfile);
 
     if (!validProfile) redirect('/onboarding')
+
+    redirect('/chat')
 
     const { data, error } = await getMBCharacteristics();
     if (error) {
