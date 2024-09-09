@@ -8,20 +8,15 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { User } from '@supabase/supabase-js'
 import { getUserProfile, signout } from '@/app/(auth)/actions'
-import { SupabaseOrganization } from '@/types/supabase'
-
-export interface UserMenuProps {
-  user: User & { organizations: SupabaseOrganization } & { name?: string }
-}
+import { SupabaseOrganization, SupabaseProfile } from '@/types/supabase'
 
 function getUserInitials(name: string) {
   const [firstName, lastName] = name.split(' ')
   return lastName ? `${firstName[0]}${lastName[0]}` : firstName.slice(0, 2)
 }
 
-export async function UserMenu({ user }: UserMenuProps) {
+export async function UserMenu({ profile }: { profile: SupabaseProfile }) {
 
-  const profile = await getUserProfile()
   if (!profile) return null
 
   return (
@@ -30,15 +25,15 @@ export async function UserMenu({ user }: UserMenuProps) {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="pl-0">
             <div className="flex size-7 shrink-0 select-none items-center justify-center rounded-full bg-muted/50 text-xs font-medium uppercase text-muted-foreground">
-              {getUserInitials(user.email ?? "example@domain.com")}
+              {getUserInitials(profile.email ?? "example@domain.com")}
             </div>
             <span className="ml-2 hidden md:block">{profile.name}</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent sideOffset={8} align="start" className="w-fit">
           <DropdownMenuItem className="flex-col items-start">
-            <div className="text-xs text-zinc-500">{user.name}</div>
-            <div className="text-xs text-zinc-500">{user.email}</div>
+            <div className="text-xs text-zinc-500">{profile.name}</div>
+            <div className="text-xs text-zinc-500">{profile.email}</div>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           {/* <DropdownMenuItem className="flex-col items-start">

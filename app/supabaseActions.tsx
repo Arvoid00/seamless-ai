@@ -7,19 +7,6 @@ import { FormItems } from "@/components/onboarding/OnboardingForm";
 import { date } from "zod";
 import { padZero } from "@/lib/utils";
 
-export async function getUserProfile() {
-    const supabase = createClient();
-
-    const {
-        data: { user }, error: userError
-    } = await supabase.auth.getUser()
-    if (!user) return { data: null, error: userError }
-
-    const { data, error } = await supabase.from('profiles').select('*').eq('user_id', user.id).maybeSingle();
-
-    return { data, error };
-}
-
 export async function getMBCharacteristics() {
     const supabase = createClient();
 

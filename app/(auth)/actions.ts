@@ -66,17 +66,20 @@ export async function getUserProfile() {
   const supabase = createClient()
 
   const {
-    data: { user }
+    data: { user },
+    error: userError
   } = await supabase.auth.getUser()
-  if (!user) return null
+  if (!user) return { data: null, userError }
 
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
     .eq('user_id', user?.id)
     .maybeSingle()
-    .throwOnError()
-  return data
+
+  if (error) return { data: null, error }
+
+  return { data, error }
 }
 
 export async function getUserProfileWithOrg() {
@@ -93,5 +96,5 @@ export async function getUserProfileWithOrg() {
     .eq('id', user?.id)
     .maybeSingle()
     .throwOnError()
-  return data
+  return { data, error }
 }

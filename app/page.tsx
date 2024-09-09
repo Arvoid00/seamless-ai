@@ -1,11 +1,12 @@
 import MBForm, { MBCharacteristics } from '@/components/MBForm';
 import Image from 'next/image';
-import { getIntelligences, getMBCharacteristics, getQuiz, getQuizQuestions, getQuizResults, getUserProfile } from './supabaseActions';
+import { getIntelligences, getMBCharacteristics, getQuiz, getQuizQuestions, getQuizResults } from './supabaseActions';
 import IntelligencesForm, { Intelligences } from '@/components/IntelligencesForm';
 import DynamicQuiz from '@/components/DynamicQuiz';
 import StaticQuiz from '@/components/StaticQuiz';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
+import { getUserProfile } from './(auth)/actions';
 
 export default async function HomePage() {
 
@@ -24,10 +25,10 @@ export default async function HomePage() {
         throw userProfileError;
     }
 
-    const validProfile = userProfile && userProfile.human_design_json && userProfile.background_results && userProfile.mbti_results;
-    console.log('validProfile', validProfile);
+    const hasCompletedOnboarding = userProfile && userProfile.human_design_json && userProfile.background_results && userProfile.mbti_results;
+    console.log('hasCompletedOnboarding', hasCompletedOnboarding);
 
-    if (!validProfile) redirect('/onboarding')
+    if (!hasCompletedOnboarding) redirect('/onboarding')
 
     redirect('/chat')
 

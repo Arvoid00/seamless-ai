@@ -13,7 +13,7 @@ import { UserMenu } from '@/components/user-menu'
 import { SidebarMobile } from './sidebar-mobile'
 import { SidebarToggle } from './sidebar-toggle'
 import { ChatHistory } from './chat-history'
-import { getUser, getUserProfile, getUserProfileWithOrg } from '@/app/(auth)/actions'
+import { getUserProfile } from '@/app/(auth)/actions'
 import { CommandMenu } from './command-menu'
 import {
   Tooltip,
@@ -22,14 +22,17 @@ import {
 } from '@/components/ui/tooltip'
 
 async function UserOrLogin() {
-  // const user = await getUserProfileWithOrg()
-  const user = await getUserProfile()
+  const { data: profile, error: profileError } = await getUserProfile()
+  if (profileError) throw profileError
+
+  console.log(profile)
+
   return (
     <>
-      {user ? (
+      {profile ? (
         <>
           <SidebarMobile>
-            <ChatHistory userId={user.id} agentName='' />
+            <ChatHistory userId={profile.id} agentName='' />
           </SidebarMobile>
           <SidebarToggle />
         </>
@@ -41,8 +44,8 @@ async function UserOrLogin() {
       )}
       <div className="flex items-center">
         <IconSeparator className="size-6 text-muted-foreground/50" />
-        {user ? (
-          <UserMenu user={user} />
+        {profile ? (
+          <UserMenu profile={profile} />
         ) : (
           <Button variant="link" asChild className="-ml-2">
             <Link href="/login">Login</Link>

@@ -75,12 +75,6 @@ export function Chat({ id, title, className, user, missingKeys }: ChatProps) {
 
       console.log("responseMessage", responseMessage);
 
-      // const onboardingMessage = {
-      //   id: nanoid(),
-      //   display: <SystemMessage>{responseMessage.message}</SystemMessage>
-      // }
-
-
       // Trigger the first chat prompt with extra data
       setMessages(currentMessages => [...currentMessages, responseMessage]);
 
